@@ -1,5 +1,28 @@
 <?php
 
+//////////////
+// Add Custom Product Fields
+// https://www.cloudways.com/blog/add-custom-product-fields-woocommerce/
+//////////////
+
+// The code for displaying WooCommerce Product Custom Fields
+add_action( 'woocommerce_product_options_general_product_data', 'woocommerce_product_custom_fields' ); 
+// Following code Saves  WooCommerce Product Custom Fields
+add_action( 'woocommerce_process_product_meta', 'woocommerce_product_custom_fields_save' );
+
+function woocommerce_product_custom_fields () {
+    global $woocommerce, $post;
+    echo '<div class=" product_custom_field ">';
+    // This function has the logic of creating custom field
+    //  This function includes input text field, Text area and number field
+    echo '</div>';
+    }
+
+
+//////////////
+// MY ACCOUNT - EDIT ACCOUNT FORM
+//////////////
+
 // Add the custom field "favorite_color"
 add_action( 'woocommerce_edit_account_form', 'add_favorite_color_to_edit_account_form' );
 function add_favorite_color_to_edit_account_form() {
@@ -24,8 +47,69 @@ function save_favorite_color_account_details( $user_id ) {
         update_user_meta( $user_id, 'billing_email', sanitize_text_field( $_POST['account_email'] ) );
 }
 
-//////////////////////////////////////////////////////////////
-// ADD FIRST NAME, LAST NAME, PHONE NUMBER TO REGISTER FORM //
+//////////////
+// ADD BIRTH DATE TO MY ACCOUNT EDIT PAGE
+//////////////
+
+add_action( 'woocommerce_edit_account_form', 'action_woocommerce_edit_account_form' );
+function action_woocommerce_edit_account_form() {   
+    woocommerce_form_field( 'birthday_field', array(
+        'type'        => 'date',
+        'label'       => __( 'My Birth Date', 'woocommerce' ),
+        'placeholder' => __( 'Date of Birth', 'woocommerce' ),
+        'required'    => true,
+    ), get_user_meta( get_current_user_id(), 'birthday_field', true ));
+}
+
+
+// Validate Birth Date - my account
+function action_woocommerce_save_account_details_errors( $args ){
+    if ( isset($_POST['birthday_field']) && empty($_POST['birthday_field']) ) {
+        $args->add( 'error', __( 'Please provide a birth date', 'woocommerce' ) );
+    }
+}
+add_action( 'woocommerce_save_account_details_errors','action_woocommerce_save_account_details_errors', 10, 1 );
+
+// Save - my account
+function action_woocommerce_save_account_details( $user_id ) {  
+    if( isset($_POST['birthday_field']) && ! empty($_POST['birthday_field']) ) {
+        update_user_meta( $user_id, 'birthday_field', sanitize_text_field($_POST['birthday_field']) );
+    }
+}
+add_action( 'woocommerce_save_account_details', 'action_woocommerce_save_account_details', 10, 1 );
+
+//////////////
+// GET USER LOCATION BY IP
+//////////////
+
+function get_user_geo_country(){
+    $geo      = new WC_Geolocation(); // Get WC_Geolocation instance object
+    $user_ip  = $geo->get_ip_address(); // Get user IP
+    $user_geo = $geo->geolocate_ip( $user_ip ); // Get geolocated user data.
+    $country  = $user_geo['country']; // Get the country code
+    return sprintf( '<p>' . __('We ship to %s', 'woocommerce') . '</p>', WC()->countries->countries[ $country ] );
+}
+add_shortcode('geoip_country', 'get_user_geo_country');
+
+//////////////
+// ADD LOGIN & LOGOUT LINK TO PRIMARY MENU
+//////////////
+
+add_filter( 'wp_nav_menu_items', 'add_loginout_link', 10, 2 );
+function add_loginout_link( $items, $args ) {
+    if (is_user_logged_in() && $args->theme_location == 'primary') {
+        $items .= '<li><a href="'. wp_logout_url( get_permalink(wc_get_page_id('myaccount'))) .'">Log Out</a></li>';
+    }
+    elseif (!is_user_logged_in() && $args->theme_location == 'primary') {
+        $items .= '<li><a href="'. get_permalink( wc_get_page_id( 'myaccount' ) ) .'">Log In</a></li>';
+    }
+    return $items;
+}
+
+//////////////
+// ADD FIRST NAME, LAST NAME, PHONE NUMBER TO MY ACCOUNT REGISTER FORM
+//////////////
+
 function wooc_extra_register_fields() {?>
     <p class="form-row form-row-first">
     <label for="reg_billing_first_name"><?php _e( 'First name', 'woocommerce' ); ?><span class="required">*</span></label>
@@ -83,60 +167,3 @@ function wooc_save_extra_register_fields( $customer_id ) {
 
 }
 add_action( 'woocommerce_created_customer', 'wooc_save_extra_register_fields' );
-//////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////
-// Add field Birth Date - my account
-function action_woocommerce_edit_account_form() {   
-    woocommerce_form_field( 'birthday_field', array(
-        'type'        => 'date',
-        'label'       => __( 'My Birth Date', 'woocommerce' ),
-        'placeholder' => __( 'Date of Birth', 'woocommerce' ),
-        'required'    => true,
-    ), get_user_meta( get_current_user_id(), 'birthday_field', true ));
-}
-add_action( 'woocommerce_edit_account_form', 'action_woocommerce_edit_account_form' );
-
-// Validate Birth Date - my account
-function action_woocommerce_save_account_details_errors( $args ){
-    if ( isset($_POST['birthday_field']) && empty($_POST['birthday_field']) ) {
-        $args->add( 'error', __( 'Please provide a birth date', 'woocommerce' ) );
-    }
-}
-add_action( 'woocommerce_save_account_details_errors','action_woocommerce_save_account_details_errors', 10, 1 );
-
-// Save - my account
-function action_woocommerce_save_account_details( $user_id ) {  
-    if( isset($_POST['birthday_field']) && ! empty($_POST['birthday_field']) ) {
-        update_user_meta( $user_id, 'birthday_field', sanitize_text_field($_POST['birthday_field']) );
-    }
-}
-add_action( 'woocommerce_save_account_details', 'action_woocommerce_save_account_details', 10, 1 );
-
-/*
-// Add field - admin
-function add_user_birtday_field( $user ) {
-    ?>
-        <h3><?php _e('Birthday','woocommerce' ); ?></h3>
-        <table class="form-table">
-            <tr>
-                <th><label for="birthday_field"><?php _e( 'Date of Birth', 'woocommerce' ); ?></label></th>
-                <td><input type="date" name="birthday_field" value="<?php echo esc_attr( get_the_author_meta( 'birthday_field', $user->ID )); ?>" class="regular-text" /></td>
-            </tr>
-        </table>
-        <br />
-    <?php
-}
-add_action( 'show_user_profile', 'add_user_birtday_field', 10, 1 );
-add_action( 'edit_user_profile', 'add_user_birtday_field', 10, 1 );
-
-
-// Save field - admin
-function save_user_birtday_field( $user_id ) {
-    if( ! empty($_POST['birthday_field']) ) {
-        update_user_meta( $user_id, 'birthday_field', sanitize_text_field( $_POST['birthday_field'] ) );
-    }
-}
-add_action( 'personal_options_update', 'save_user_birtday_field', 10, 1 );
-add_action( 'edit_user_profile_update', 'save_user_birtday_field', 10, 1 );
-*/
