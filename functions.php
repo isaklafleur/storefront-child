@@ -1,7 +1,5 @@
 <?php
 
-remove_action( 'storefront_footer', 'storefront_credit', 20 );
-
 /**
  * @snippet       Distraction-free Checkout
  * @how-to        Get CustomizeWoo.com FREE
