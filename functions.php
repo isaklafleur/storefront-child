@@ -1,5 +1,50 @@
 <?php
 
+remove_action( 'storefront_footer', 'storefront_credit', 20 );
+
+/**
+ * @snippet       Distraction-free Checkout
+ * @how-to        Get CustomizeWoo.com FREE
+ * @sourcecode    https://businessbloomer.com/?p=111758
+ * @author        Rodolfo Melogli
+ * @compatible    WooCommerce 3.5.4
+ * @donate $9     https://businessbloomer.com/bloomer-armada/
+ */
+ 
+add_action( 'wp', 'bbloomer_nodistraction_checkout' );
+ 
+function bbloomer_nodistraction_checkout() {
+   if ( ! is_checkout() ) return;
+   remove_action( 'storefront_header', 'storefront_social_icons', 10 );
+   remove_action( 'storefront_header', 'storefront_secondary_navigation', 30 );
+   remove_action( 'storefront_header', 'storefront_product_search', 40 );
+   remove_action( 'storefront_header', 'storefront_primary_navigation', 50 );
+   remove_action( 'storefront_header', 'storefront_header_cart', 60 );
+   remove_action( 'storefront_footer', 'storefront_footer_widgets', 10 );
+}
+
+//////////////
+// Hide ALL shipping rates in ALL zones when Free Shipping is available
+//////////////
+  
+add_filter('woocommerce_package_rates', 'bbloomer_unset_shipping_when_free_is_available_all_zones', 10, 2);
+   
+function bbloomer_unset_shipping_when_free_is_available_all_zones( $rates, $package ) {
+$all_free_rates = array();
+foreach ( $rates as $rate_id => $rate ) {
+      if ( 'free_shipping' === $rate->method_id ) {
+         $all_free_rates[ $rate_id ] = $rate;
+         break;
+      }
+}
+     
+if ( empty( $all_free_rates )) {
+        return $rates;
+} else {
+        return $all_free_rates;
+}
+}
+
 //////////////
 // Add Custom Product Fields
 // https://www.cloudways.com/blog/add-custom-product-fields-woocommerce/
