@@ -1,8 +1,37 @@
 <?php
 
 // https://docs.woocommerce.com/document/introduction-to-hooks-actions-and-filters/
-// https://woocommerce.github.io/code-reference/hooks/hooks.html
+// https://woocommerce.github.io/code-reference/
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// FILTERS
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @snippet        Change Product Tab Titles and Headings @ WooCommerce Checkout
+ * @author         Misha Rudrastyh
+ * @compatible     WC 4.9
+ * @source         https://rudrastyh.com/woocommerce/rename-product-tabs-and-heading.html
+ */
+
+add_filter('woocommerce_product_tabs', 'rename_reviews_tab');
+function rename_reviews_tab($tabs)
+{
+    global $product;
+    $tabs['reviews']['title'] = 'Reviews & Questions (' . $product->get_review_count() . ') ';
+    return $tabs;
+}
+
+/**
+ * @snippet        Remove Order Notes @ WooCommerce Checkout
+ * @author         Rodolfo Melogli
+ * @compatible     WC 4.9
+ * @source         https://www.businessbloomer.com/woocommerce-remove-order-notes-checkout-page/
+ */
+
+add_filter('woocommerce_enable_order_notes_field', '__return_false');
 
 /**
  * @snippet       If a store owner wants to force the country display under order page
@@ -20,63 +49,6 @@ add_filter('woocommerce_formatted_address_force_country_display', '__return_true
  * @source        https://njengah.com/remove-built-with-storefront-woocommerce/
  */
 
-add_action('wp', 'njenga_remove_storefront_credit');
-
-function njenga_remove_storefront_credit()
-{
-    remove_action('storefront_footer', 'storefront_credit', 20);
-}
-
-/**
- * @snippet       Remove "Default Sorting" Dropdown @ StoreFront Shop & Archive Pages
- * @author        Rodolfo Melogli
- * @compatible    WooCommerce 4.8
- * @source        https://businessbloomer.com/bloomer-armada/
- */
-
-add_action('wp', 'bbloomer_remove_default_sorting_storefront');
-
-function bbloomer_remove_default_sorting_storefront()
-{
-    remove_action('woocommerce_after_shop_loop', 'woocommerce_catalog_ordering', 10);
-    remove_action('woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 10);
-}
-
-/**
- * @snippet       Remove “Showing all X results” from Shop and Product Archive Pages
- * @author        xxxx
- * @compatible    WooCommerce 4.8
- * @source    https://rudrastyh.com/woocommerce/remove-result-count.html
- */
-
-add_action('wp', 'bbloomer_remove_result_count_storefront');
-
-function bbloomer_remove_result_count_storefront()
-{
-    remove_action('woocommerce_before_shop_loop', 'woocommerce_result_count', 20);
-    remove_action('woocommerce_after_shop_loop', 'woocommerce_result_count', 20);
-}
-
-/**
- * @snippet       Distraction-free Checkout
- * @author        Rodolfo Melogli
- * @compatible    WooCommerce 4.8
- * @source    https://businessbloomer.com/?p=111758
- */
-
-add_action('wp', 'bbloomer_nodistraction_checkout');
-
-function bbloomer_nodistraction_checkout()
-{
-    if (!is_checkout()) return;
-    remove_action('storefront_header', 'storefront_social_icons', 10);
-    remove_action('storefront_header', 'storefront_secondary_navigation', 30);
-    remove_action('storefront_header', 'storefront_product_search', 40);
-    remove_action('storefront_header', 'storefront_primary_navigation', 50);
-    remove_action('storefront_header', 'storefront_header_cart', 60);
-    remove_action('storefront_footer', 'storefront_footer_widgets', 10);
-}
-
 /**
  * @snippet       Hide ALL shipping rates in ALL zones when Free Shipping is available
  * @author        Rodolfo Melogli
@@ -85,7 +57,6 @@ function bbloomer_nodistraction_checkout()
  */
 
 add_filter('woocommerce_package_rates', 'bbloomer_unset_shipping_when_free_is_available_all_zones', 10, 2);
-
 function bbloomer_unset_shipping_when_free_is_available_all_zones($rates, $package)
 {
     $all_free_rates = array();
@@ -103,149 +74,134 @@ function bbloomer_unset_shipping_when_free_is_available_all_zones($rates, $packa
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// ACTIONS
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * @snippet        Check what user role the user has, if it has user role xxx do this.
+ * @author         Isak Engdahl
+ * @compatible     WC 4.9
+ * @source         
+ */
+
+/*
+ add_action('woocommerce_single_product_summary', 'woocommerce_check_user_role');
+function woocommerce_check_user_role()
+{
+    $user = wp_get_current_user();
+    if (in_array('brandpartner', (array) $user->roles)) {
+        //The user has the "author" role
+        // Show Role
+        // Show Subscriber Image
+        echo "Welcome Brand Partner";
+    } else {
+        echo "You are not welcome, because you are not a brand partner...";
+    }
+}
+*/
+
+add_action('wp', 'njenga_remove_storefront_credit');
+function njenga_remove_storefront_credit()
+{
+    remove_action('storefront_footer', 'storefront_credit', 20);
+}
+
+/**
+ * @snippet       Remove "Default Sorting" Dropdown @ StoreFront Shop & Archive Pages
+ * @author        Rodolfo Melogli
+ * @compatible    WooCommerce 4.8
+ * @source        https://businessbloomer.com/bloomer-armada/
+ */
+
+add_action('wp', 'bbloomer_remove_default_sorting_storefront');
+function bbloomer_remove_default_sorting_storefront()
+{
+    remove_action('woocommerce_after_shop_loop', 'woocommerce_catalog_ordering', 10);
+    remove_action('woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 10);
+}
+
+/**
+ * @snippet       Remove “Showing all X results” from Shop and Product Archive Pages
+ * @author        xxxx
+ * @compatible    WooCommerce 4.8
+ * @source    https://rudrastyh.com/woocommerce/remove-result-count.html
+ */
+
+add_action('wp', 'bbloomer_remove_result_count_storefront');
+function bbloomer_remove_result_count_storefront()
+{
+    remove_action('woocommerce_before_shop_loop', 'woocommerce_result_count', 20);
+    remove_action('woocommerce_after_shop_loop', 'woocommerce_result_count', 20);
+}
+
 /**
  * @snippet       Add Custom Product Fields
  * @author        Rodolfo Melogli
  * @compatible    WooCommerce 4.8
- * @source        https://www.cloudways.com/blog/add-custom-product-fields-woocommerce/
+ * @source        https://www.cloudways.com/blog/add-custom-product-fields-woocommerce/ / https://www.ibenic.com/how-to-add-woocommerce-custom-product-fields / https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-wc-meta-box-functions.html / https://pluginrepublic.com/woocommerce-custom-fields/
  */
 
-// The code for displaying WooCommerce Product Custom Fields
+// Add WooCommerce Custom Fields on Edit Product Page
 add_action('woocommerce_product_options_general_product_data', 'woocommerce_product_custom_fields');
-// Following code Saves  WooCommerce Product Custom Fields
-add_action('woocommerce_process_product_meta', 'woocommerce_product_custom_fields_save');
-
 function woocommerce_product_custom_fields()
 {
-    global $woocommerce, $post;
-    echo '<div class=" product_custom_field ">';
-    // This function has the logic of creating custom field
-    //  This function includes input text field, Text area and number field
+    echo '<div class="options_group mlm_product_volume" style="background-color: #ffcccb;">';
+?>
+<?php
+    $args = array(
+        'id' => 'mlm_product_volume',
+        'label' => __('Product volume', 'woocommerce-mlm'),
+        'placeholder' => __('Enter product volume for the product', 'woocommerce-mlm'),
+        'type' => 'number',
+        'desc'              => __('Enter the the product volume that is related to the product.', 'woocommerce-mlm'),
+        'desc_tip'          => true,
+        'custom_attributes' => array(
+            'step' => '1',
+            'min' => '0'
+        )
+    );
+    woocommerce_wp_text_input($args);
     echo '</div>';
 }
 
-/**
- * @snippet       MY ACCOUNT - EDIT ACCOUNT FORM - add custom field "favorite_color"
- * @author        xxx
- * @compatible    WooCommerce 4.8
- * @source        xxx
- */
+// Save WooCommerce Custom Fields
+add_action('woocommerce_process_product_meta', 'save_woocommerce_product_custom_fields');
+function save_woocommerce_product_custom_fields($post_id)
+{
+    $mlm_product_volume_value = isset($_POST['mlm_product_volume']) ? $_POST['mlm_product_volume'] : '';
+    $product = wc_get_product($post_id);
+    $product->update_meta_data('mlm_product_volume', sanitize_text_field($mlm_product_volume_value));
+    $product->save();
+}
 
-// Add the custom field "favorite_color"
-add_action('woocommerce_edit_account_form', 'add_favorite_color_to_edit_account_form');
-function add_favorite_color_to_edit_account_form()
+// Add WooCommerce Custom Fields on Display Product Page
+add_action('woocommerce_single_product_summary', 'woocommerce_custom_fields_display');
+function woocommerce_custom_fields_display()
 {
     $user = wp_get_current_user();
-?>
-    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="favorite_color"><?php _e('Favorite color', 'woocommerce'); ?></label>
-        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="favorite_color" id="favorite_color" value="<?php echo esc_attr($user->favorite_color); ?>" />
-    </p>
-<?php
-}
+    if (in_array('brandpartner', (array) $user->roles)) {
+        //The user has the "author" role
+        // Show Role
+        // Show Subscriber Image
 
-// Save the custom field 'favorite_color' 
-add_action('woocommerce_save_account_details', 'save_favorite_color_account_details', 12, 1);
-function save_favorite_color_account_details($user_id)
-{
-    // For Favorite color
-    if (isset($_POST['favorite_color']))
-        update_user_meta($user_id, 'favorite_color', sanitize_text_field($_POST['favorite_color']));
+        global $post;
+        $product = wc_get_product($post->ID);
+        $mlm_product_volume_value = $product->get_meta('mlm_product_volume');
 
-    // For Billing email (added related to your comment)
-    if (isset($_POST['account_email']))
-        update_user_meta($user_id, 'billing_email', sanitize_text_field($_POST['account_email']));
-}
-
-/**
- * @snippet       ADD BIRTH DATE TO MY ACCOUNT EDIT PAGE
- * @author        xxx
- * @compatible    WooCommerce 4.8
- * @source        xxx
- */
-
-add_action('woocommerce_edit_account_form', 'action_woocommerce_edit_account_form');
-function action_woocommerce_edit_account_form()
-{
-    woocommerce_form_field('birthday_field', array(
-        'type'        => 'date',
-        'label'       => __('My Birth Date', 'woocommerce'),
-        'placeholder' => __('Date of Birth', 'woocommerce'),
-        'required'    => true,
-    ), get_user_meta(get_current_user_id(), 'birthday_field', true));
-}
-
-
-// Validate Birth Date - my account
-function action_woocommerce_save_account_details_errors($args)
-{
-    if (isset($_POST['birthday_field']) && empty($_POST['birthday_field'])) {
-        $args->add('error', __('Please provide a birth date', 'woocommerce'));
+        if ($mlm_product_volume_value) {
+            // Only display our field if we've got a value for the field title
+            printf(
+                '<p class="price">%s PV</p>',
+                esc_html($mlm_product_volume_value)
+            );
+        }
+    } else {
+        echo "No PV, because your are not logged in as Brand Partner... :(";
     }
-}
-add_action('woocommerce_save_account_details_errors', 'action_woocommerce_save_account_details_errors', 10, 1);
-
-// Save - my account
-function action_woocommerce_save_account_details($user_id)
-{
-    if (isset($_POST['birthday_field']) && !empty($_POST['birthday_field'])) {
-        update_user_meta($user_id, 'birthday_field', sanitize_text_field($_POST['birthday_field']));
-    }
-}
-add_action('woocommerce_save_account_details', 'action_woocommerce_save_account_details', 10, 1);
-
-/**
- * @snippet       GET USER LOCATION BY IP
- * @author        xxx
- * @compatible    WooCommerce 4.8
- * @source        xxx
- */
-
-add_shortcode('geoip_country', 'get_user_geo_country');
-function get_user_geo_country()
-{
-    $geo      = new WC_Geolocation(); // Get WC_Geolocation instance object
-    $user_ip  = $geo->get_ip_address(); // Get user IP
-    $user_geo = $geo->geolocate_ip($user_ip); // Get geolocated user data.
-    $country  = $user_geo['country']; // Get the country code
-    $state   = isset($user_geodata['state']) ? $user_geodata['state'] : ''; // Get current user GeoIP State
-    return sprintf('<p>' . __('We ship to %s', 'woocommerce') . '</p>', WC()->countries->countries[$country]);
-}
-
-/**
- * @snippet       WooCommerce User Countery Name Shortcode
- * @author        xxx
- * @compatible    WooCommerce 4.8
- * @source        xxx
- */
-
-add_shortcode('wc_geo_country_name', 'wcct_custom_get_user_geo_country_name');
-function wcct_custom_get_user_geo_country_name()
-{
-    $geo      = new WC_Geolocation(); // Get WC_Geolocation instance object
-    $user_ip  = $geo->get_ip_address(); // Get user IP
-    $user_geo = $geo->geolocate_ip($user_ip); // Get geolocated user data.
-    $country  = $user_geo['country']; // Get the country code
-
-    return WC()->countries->countries[$country];
-}
-
-/**
- * @snippet       ADD LOGIN & LOGOUT LINK TO PRIMARY MENU
- * @author        xxx
- * @compatible    WooCommerce 4.8
- * @source        xxx
- */
-
-add_filter('wp_nav_menu_items', 'add_loginout_link', 10, 2);
-function add_loginout_link($items, $args)
-{
-    if (is_user_logged_in() && $args->theme_location == 'primary') {
-        $items .= '<li><a href="' . wp_logout_url(get_permalink(wc_get_page_id('myaccount'))) . '">Log Out</a></li>';
-    } elseif (!is_user_logged_in() && $args->theme_location == 'primary') {
-        $items .= '<li><a href="' . get_permalink(wc_get_page_id('myaccount')) . '">Log In</a></li>';
-    }
-    return $items;
 }
 
 /**
@@ -255,6 +211,8 @@ function add_loginout_link($items, $args)
  * @source        xxx
  */
 
+// Add extra fields to Registration form
+add_action('woocommerce_register_form_start', 'wooc_extra_register_fields');
 function wooc_extra_register_fields()
 { ?>
     <p class="form-row form-row-first">
@@ -272,9 +230,9 @@ function wooc_extra_register_fields()
     <div class="clear"></div>
 <?php
 }
-add_action('woocommerce_register_form_start', 'wooc_extra_register_fields');
 
-// register fields Validating
+// Validate extra fields
+add_action('woocommerce_register_post', 'wooc_validate_extra_register_fields', 10, 3);
 function wooc_validate_extra_register_fields($username, $email, $validation_errors)
 {
     if (isset($_POST['billing_first_name']) && empty($_POST['billing_first_name'])) {
@@ -286,9 +244,9 @@ function wooc_validate_extra_register_fields($username, $email, $validation_erro
     }
     return $validation_errors;
 }
-add_action('woocommerce_register_post', 'wooc_validate_extra_register_fields', 10, 3);
 
-// Below code save extra fields.
+// Save extra fields
+add_action('woocommerce_created_customer', 'wooc_save_extra_register_fields');
 function wooc_save_extra_register_fields($customer_id)
 {
     if (isset($_POST['billing_phone'])) {
@@ -308,4 +266,3 @@ function wooc_save_extra_register_fields($customer_id)
         update_user_meta($customer_id, 'billing_last_name', sanitize_text_field($_POST['billing_last_name']));
     }
 }
-add_action('woocommerce_created_customer', 'wooc_save_extra_register_fields');
