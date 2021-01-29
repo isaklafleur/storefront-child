@@ -183,10 +183,13 @@ add_action('woocommerce_single_product_summary', 'woocommerce_custom_fields_disp
 function woocommerce_custom_fields_display()
 {
     $user = wp_get_current_user();
+
+    //Run code is the user is a Brand Partner
     if (in_array('brandpartner', (array) $user->roles)) {
-        //The user has the "author" role
-        // Show Role
-        // Show Subscriber Image
+
+
+        // Display user data
+        woocommerce_display_username();
 
         global $post;
         $product = wc_get_product($post->ID);
@@ -202,6 +205,27 @@ function woocommerce_custom_fields_display()
     } else {
         echo "No PV, because your are not logged in as Brand Partner... :(";
         echo "<br/>";
+    }
+}
+
+/**
+ * @snippet       Display logged-in username IF logged-in
+ * @author        Travis Pflanz
+ * @compatible    WooCommerce 4.8
+ * @source        https://wordpress.stackexchange.com/a/49688/200418
+ */
+
+// Display $current_user variable data
+function woocommerce_display_username()
+{
+    global $current_user;
+    wp_get_current_user();
+    if (is_user_logged_in()) {
+        //var_dump($current_user);
+        echo 'Username: ' . $current_user->user_login . "\n";
+        echo 'User display name: ' . $current_user->display_name . "\n";
+    } else {
+        wp_loginout();
     }
 }
 
