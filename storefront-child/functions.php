@@ -291,3 +291,42 @@ function wooc_save_extra_register_fields($customer_id)
         update_user_meta($customer_id, 'billing_last_name', sanitize_text_field($_POST['billing_last_name']));
     }
 }
+
+
+/**
+ * @snippet       ADD PHONE NUMBER TO MY ACCOUNT - EDIT FORM
+ * @author        LoicTheAztec
+ * @compatible    WooCommerce 4.9
+ * @source        https://stackoverflow.com/questions/51103458/add-a-mobile-phone-field-on-my-account-edit-account-in-woocommerce
+ */
+
+/*
+// Display the mobile phone field
+// add_action( 'woocommerce_edit_account_form_start', 'add_billing_mobile_phone_to_edit_account_form' ); // At start
+add_action( 'woocommerce_edit_account_form', 'add_billing_mobile_phone_to_edit_account_form' ); // After existing fields
+function add_billing_mobile_phone_to_edit_account_form() {
+    $user = wp_get_current_user();
+    ?>
+     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+        <label for="billing_mobile_phone"><?php _e( 'Mobile phone', 'woocommerce' ); ?> <span class="required">*</span></label>
+        <input type="text" class="woocommerce-Input woocommerce-Input--phone input-text" name="billing_mobile_phone" id="billing_mobile_phone" value="<?php echo esc_attr( $user->billing_mobile_phone ); ?>" />
+    </p>
+    <?php
+}
+*/
+
+// Check and validate the mobile phone
+add_action('woocommerce_save_account_details_errors', 'billing_mobile_phone_field_validation', 20, 1);
+function billing_mobile_phone_field_validation($args)
+{
+    if (isset($_POST['billing_mobile_phone']) && empty($_POST['billing_mobile_phone']))
+        $args->add('error', __('Please fill in your Mobile phone', 'woocommerce'), '');
+}
+
+// Save the mobile phone value to user data
+add_action('woocommerce_save_account_details', 'my_account_saving_billing_mobile_phone', 20, 1);
+function my_account_saving_billing_mobile_phone($user_id)
+{
+    if (isset($_POST['billing_mobile_phone']) && !empty($_POST['billing_mobile_phone']))
+        update_user_meta($user_id, 'billing_mobile_phone', sanitize_text_field($_POST['billing_mobile_phone']));
+}
