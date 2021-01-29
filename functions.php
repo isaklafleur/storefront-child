@@ -201,6 +201,7 @@ function woocommerce_custom_fields_display()
         }
     } else {
         echo "No PV, because your are not logged in as Brand Partner... :(";
+        echo "<br/>";
     }
 }
 
