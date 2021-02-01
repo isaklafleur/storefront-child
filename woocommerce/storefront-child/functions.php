@@ -139,7 +139,7 @@ function bbloomer_remove_result_count_storefront()
 }
 
 /**
- * @snippet       Add Custom Product Fields
+ * @snippet       Add Product Volume field on product page
  * @author        Rodolfo Melogli
  * @compatible    WooCommerce 4.8
  * @source        https://www.cloudways.com/blog/add-custom-product-fields-woocommerce/ / https://www.ibenic.com/how-to-add-woocommerce-custom-product-fields / https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-wc-meta-box-functions.html / https://pluginrepublic.com/woocommerce-custom-fields/
@@ -249,8 +249,8 @@ function wooc_extra_register_fields()
         <input type="text" class="input-text" name="billing_last_name" id="reg_billing_last_name" value="<?php if (!empty($_POST['billing_last_name'])) esc_attr_e($_POST['billing_last_name']); ?>" />
     </p>
     <p class="form-row form-row-wide">
-        <label for="reg_billing_phone"><?php _e('Phone', 'woocommerce'); ?></label>
-        <input type="text" class="input-text" name="billing_phone" id="reg_billing_phone" value="<?php esc_attr_e($_POST['billing_phone']); ?>" />
+        <label for="reg_billing_phone"><?php _e('Mobile phone (test with pattern pattern="\+46\d{9}")', 'woocommerce'); ?><span class="required">*</span></label>
+        <input type="tel" class="input-text" name="billing_phone" id="reg_billing_phone" pattern="\+46\d{9}" value="<?php if (!empty($_POST['billing_phone'])) esc_attr_e($_POST['billing_phone']); ?>" />
     </p>
     <div class="clear"></div>
 <?php
@@ -261,11 +261,15 @@ add_action('woocommerce_register_post', 'wooc_validate_extra_register_fields', 1
 function wooc_validate_extra_register_fields($username, $email, $validation_errors)
 {
     if (isset($_POST['billing_first_name']) && empty($_POST['billing_first_name'])) {
-        $validation_errors->add('billing_first_name_error', __('<strong>Error</strong>: First name is required!', 'woocommerce'));
+        $validation_errors->add('billing_first_name_error', __('First name is required.', 'woocommerce'));
     }
     if (isset($_POST['billing_last_name']) && empty($_POST['billing_last_name'])) {
 
-        $validation_errors->add('billing_last_name_error', __('<strong>Error</strong>: Last name is required!.', 'woocommerce'));
+        $validation_errors->add('billing_last_name_error', __('Last name is required.', 'woocommerce'));
+    }
+    if (isset($_POST['billing_phone']) && empty($_POST['billing_phone'])) {
+
+        $validation_errors->add('billing_phone_error', __('Mobile phone is required.', 'woocommerce'));
     }
     return $validation_errors;
 }
@@ -274,10 +278,6 @@ function wooc_validate_extra_register_fields($username, $email, $validation_erro
 add_action('woocommerce_created_customer', 'wooc_save_extra_register_fields');
 function wooc_save_extra_register_fields($customer_id)
 {
-    if (isset($_POST['billing_phone'])) {
-        // Phone input filed which is used in WooCommerce
-        update_user_meta($customer_id, 'billing_phone', sanitize_text_field($_POST['billing_phone']));
-    }
     if (isset($_POST['billing_first_name'])) {
         //First name field which is by default
         update_user_meta($customer_id, 'first_name', sanitize_text_field($_POST['billing_first_name']));
@@ -289,6 +289,10 @@ function wooc_save_extra_register_fields($customer_id)
         update_user_meta($customer_id, 'last_name', sanitize_text_field($_POST['billing_last_name']));
         // Last name field which is used in WooCommerce
         update_user_meta($customer_id, 'billing_last_name', sanitize_text_field($_POST['billing_last_name']));
+    }
+    if (isset($_POST['billing_phone'])) {
+        // Phone input filed which is used in WooCommerce
+        update_user_meta($customer_id, 'billing_phone', sanitize_text_field($_POST['billing_phone']));
     }
 }
 
