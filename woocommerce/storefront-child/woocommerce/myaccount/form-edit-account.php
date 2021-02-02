@@ -44,16 +44,23 @@ do_action('woocommerce_before_edit_account_form'); ?>
         <label for="account_email"><?php esc_html_e('Email address', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
         <input type="email" class="woocommerce-Input woocommerce-Input--email input-text" name="account_email" id="account_email" autocomplete="email" value="<?php echo esc_attr($user->user_email); ?>" />
     </p>
-    <!--
+
     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="billing_mobile_phone"><?php esc_html_e('Mobile phone', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
-        <input type="tel" class="woocommerce-Input woocommerce-Input--phone input-text" name="billing_mobile_phone" id="billing_mobile_phone" value="<?php echo esc_attr($user->billing_mobile_phone); ?>" />
-    </p>
-    -->
-    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="reg_phone"><?php _e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?> <span class="required">*</span></label>
+        <label for="reg_phone"><?php esc_html_e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?> <span class="required">*</span></label>
         <input type="tel" class="woocommerce-Input woocommerce-Input--phone input-text" name="phone" pattern="\+\d{5,}" id="reg_phone" value="<?php echo esc_attr($user->phone); ?>" />
     </p>
+
+    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+        <label for="reg_birthdate"><?php esc_html_e('Birthdate', 'woocommerce'); ?> <span class="required">*</span></label>
+        <input type="date" class="woocommerce-Input woocommerce-Input--birthdate input-date" min="1920-01-01" max="2003-01-01" name="birthdate" id="reg_birthdate" value="<?php echo esc_attr($user->birthdate); ?>" />
+    </p>
+
+
+
+    <div style="overflow: hidden; height: 0px;background: transparent;" data-description="dummyPanel for Chrome auto-fill issue">
+        <input type="text" style="height:0;background: transparent; color: transparent;border: none;" data-description="dummyUsername"></input>
+        <input type="password" style="height:0;background: transparent; color: transparent;border: none;" data-description="dummyPassword"></input>
+    </div>
 
     <fieldset>
         <legend><?php esc_html_e('Password change', 'woocommerce'); ?></legend>

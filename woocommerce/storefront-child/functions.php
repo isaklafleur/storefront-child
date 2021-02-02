@@ -330,18 +330,26 @@ function add_phone_to_edit_account_form()
 */
 
 
-// Check and validate the mobile phone
-add_action('woocommerce_save_account_details_errors', 'phone_field_validation', 20, 1);
-function phone_field_validation($args)
+// Check and validate the mobile phone & birthdate
+add_action('woocommerce_save_account_details_errors', 'phone_birthdate_field_validation', 20, 1);
+function phone_birthdate_field_validation($args)
 {
-    if (isset($_POST['phone']) && empty($_POST['phone']))
+    if (isset($_POST['phone']) && empty($_POST['phone'])) {
         $args->add('error', __('Please fill in your mobile phone', 'woocommerce'), '');
+    }
+    if (isset($_POST['birthdate']) && empty($_POST['birthdate'])) {
+        $args->add('error', __('Please fill in your birthdate', 'woocommerce'), '');
+    }
 }
 
-// Save the mobile phone value to user data
-add_action('woocommerce_save_account_details', 'my_account_saving_phone', 20, 1);
-function my_account_saving_phone($user_id)
+// Save the mobile phone and birthdate value to user data
+add_action('woocommerce_save_account_details', 'my_account_saving_phone_birthdate', 20, 1);
+function my_account_saving_phone_birthdate($user_id)
 {
-    if (isset($_POST['phone']) && !empty($_POST['phone']))
+    if (isset($_POST['phone']) && !empty($_POST['phone'])) {
         update_user_meta($user_id, 'phone', sanitize_text_field($_POST['phone']));
+    }
+    if (isset($_POST['birthdate']) && !empty($_POST['birthdate'])) {
+        update_user_meta($user_id, 'birthdate', sanitize_text_field($_POST['birthdate']));
+    }
 }
