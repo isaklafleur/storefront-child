@@ -10,21 +10,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 /**
- * @snippet        Change Product Tab Titles and Headings @ WooCommerce Checkout
- * @author         Misha Rudrastyh
- * @compatible     WC 4.9
- * @source         https://rudrastyh.com/woocommerce/rename-product-tabs-and-heading.html
- */
-
-add_filter('woocommerce_product_tabs', 'rename_reviews_tab');
-function rename_reviews_tab($tabs)
-{
-    global $product;
-    $tabs['reviews']['title'] = 'Reviews & Questions (' . $product->get_review_count() . ') ';
-    return $tabs;
-}
-
-/**
  * @snippet        Remove Order Notes @ WooCommerce Checkout
  * @author         Rodolfo Melogli
  * @compatible     WC 4.9
@@ -42,12 +27,6 @@ add_filter('woocommerce_enable_order_notes_field', '__return_false');
 
 add_filter('woocommerce_formatted_address_force_country_display', '__return_true');
 
-/**
- * @snippet       Remove Built with Storefront & Woocommerce Footer Link
- * @author        JOE NJENGA
- * @compatible    WooCommerce 4.8
- * @source        https://njengah.com/remove-built-with-storefront-woocommerce/
- */
 
 /**
  * @snippet       Hide ALL shipping rates in ALL zones when Free Shipping is available
@@ -74,35 +53,32 @@ function bbloomer_unset_shipping_when_free_is_available_all_zones($rates, $packa
     }
 }
 
+/**
+ * Show an invalid coupon as valid
+ * 
+ * @author Ratnakar Dubey <ratnakar.dubey@storeapps.org>
+ *
+ * @param boolean $is_valid The validity.
+ * @param array $args Additional arguments.
+ * @return boolean
+ */
+
+add_filter('wc_sc_show_as_valid', 'storeapps_wc_sc_show_as_valid', 100, 2);
+function storeapps_wc_sc_show_as_valid($is_valid = false, $args = array())
+{
+    $coupon = (!empty($args['coupon_obj'])) ? $args['coupon_obj'] : null;
+    if (is_object($coupon) && is_callable(array($coupon, 'is_valid')) && !$coupon->is_valid()) {
+        return true;
+    }
+    return $is_valid;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // ACTIONS
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-
-/**
- * @snippet        Check what user role the user has, if it has user role xxx do this.
- * @author         Isak Engdahl
- * @compatible     WC 4.9
- * @source         
- */
-
-/*
- add_action('woocommerce_single_product_summary', 'woocommerce_check_user_role');
-function woocommerce_check_user_role()
-{
-    $user = wp_get_current_user();
-    if (in_array('brandpartner', (array) $user->roles)) {
-        //The user has the "author" role
-        // Show Role
-        // Show Subscriber Image
-        echo "Welcome Brand Partner";
-    } else {
-        echo "You are not welcome, because you are not a brand partner...";
-    }
-}
-*/
 
 add_action('wp', 'njenga_remove_storefront_credit');
 function njenga_remove_storefront_credit()
@@ -145,7 +121,7 @@ function bbloomer_remove_result_count_storefront()
  * @source        https://www.cloudways.com/blog/add-custom-product-fields-woocommerce/ / https://www.ibenic.com/how-to-add-woocommerce-custom-product-fields / https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-wc-meta-box-functions.html / https://pluginrepublic.com/woocommerce-custom-fields/
  */
 
-// Add WooCommerce Custom Fields on Edit Product Page
+// Add WooCommerce Custom Field on Edit Product Page
 add_action('woocommerce_product_options_general_product_data', 'woocommerce_product_custom_fields');
 function woocommerce_product_custom_fields()
 {
@@ -178,7 +154,7 @@ function save_woocommerce_product_custom_fields($post_id)
     $product->save();
 }
 
-// Add WooCommerce Custom Fields on Display Product Page
+// Add WooCommerce Custom Field on Display Product Page
 add_action('woocommerce_single_product_summary', 'woocommerce_custom_fields_display');
 function woocommerce_custom_fields_display()
 {
@@ -189,7 +165,7 @@ function woocommerce_custom_fields_display()
 
 
         // Display user data
-        woocommerce_display_username();
+        // woocommerce_display_username();
 
         global $post;
         $product = wc_get_product($post->ID);
@@ -208,6 +184,7 @@ function woocommerce_custom_fields_display()
     }
 }
 
+
 /**
  * @snippet       Display logged-in username IF logged-in
  * @author        Travis Pflanz
@@ -215,7 +192,8 @@ function woocommerce_custom_fields_display()
  * @source        https://wordpress.stackexchange.com/a/49688/200418
  */
 
-// Display $current_user variable data
+/*
+ // Display $current_user variable data
 function woocommerce_display_username()
 {
     global $current_user;
@@ -228,9 +206,10 @@ function woocommerce_display_username()
         wp_loginout();
     }
 }
+*/
 
 /**
- * @snippet       ADD FIRST NAME, LAST NAME, PHONE NUMBER TO MY ACCOUNT REGISTER FORM
+ * @snippet       ADD FIRST NAME, LAST NAME, MOBILE NUMBER TO MY ACCOUNT REGISTER FORM
  * @author        xxx
  * @compatible    WooCommerce 4.8
  * @source        xxx
@@ -249,8 +228,20 @@ function wooc_extra_register_fields()
         <input type="text" class="input-text" name="billing_last_name" id="reg_billing_last_name" value="<?php if (!empty($_POST['billing_last_name'])) esc_attr_e($_POST['billing_last_name']); ?>" />
     </p>
     <p class="form-row form-row-wide">
-        <label for="reg_billing_phone"><?php _e('Mobile phone (test with pattern pattern="\+46\d{9}")', 'woocommerce'); ?><span class="required">*</span></label>
-        <input type="tel" class="input-text" name="billing_phone" id="reg_billing_phone" pattern="\+46\d{9}" value="<?php if (!empty($_POST['billing_phone'])) esc_attr_e($_POST['billing_phone']); ?>" />
+        <label for="reg_billing_phone"><?php _e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?><span class="required">*</span></label>
+        <input type="tel" class="input-text" name="billing_phone" id="reg_billing_phone" pattern="\+\d{5,}" value="<?php if (!empty($_POST['billing_phone'])) esc_attr_e($_POST['billing_phone']); ?>" />
+    </p>
+    <p class="form-row form-row-first">
+        <label for="reg_role"><?php _e('Customer, Affiliate or Brand Partner?', 'woocommerce'); ?><span class="required">*</span></label>
+        <select class="input-text" name="role" id="reg_role">
+            <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'customer') esc_attr_e('selected'); ?> value="customer">Customer</option>
+            <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'affiliate') esc_attr_e('selected'); ?> value="affiliate">Affiliate</option>
+            <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'brandpartner') esc_attr_e('selected'); ?> value="brandpartner">Brand Partner</option>
+        </select>
+    </p>
+    <p class="form-row form-row-last">
+        <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?><span class="required">*</span></label>
+        <input type="text" class="input-text" name="sponsorID" id="reg_sponsorID" value="<?php if (!empty($_POST['sponsorID'])) esc_attr_e($_POST['sponsorID']); ?>" />
     </p>
     <div class="clear"></div>
 <?php
@@ -270,6 +261,13 @@ function wooc_validate_extra_register_fields($username, $email, $validation_erro
     if (isset($_POST['billing_phone']) && empty($_POST['billing_phone'])) {
 
         $validation_errors->add('billing_phone_error', __('Mobile phone is required.', 'woocommerce'));
+    }
+    if (isset($_POST['role']) && empty($_POST['role'])) {
+        $validation_errors->add('role_error', __('Role is required.', 'woocommerce'));
+    }
+    if (isset($_POST['sponsorID']) && empty($_POST['sponsorID'])) {
+
+        $validation_errors->add('sponsorID_error', __('Sponsor ID is required.', 'woocommerce'));
     }
     return $validation_errors;
 }
@@ -291,46 +289,59 @@ function wooc_save_extra_register_fields($customer_id)
         update_user_meta($customer_id, 'billing_last_name', sanitize_text_field($_POST['billing_last_name']));
     }
     if (isset($_POST['billing_phone'])) {
-        // Phone input filed which is used in WooCommerce
+        // Mobile phone input filed which is a CUSTOM The Untamed Field.
+        update_user_meta($customer_id, 'phone', sanitize_text_field($_POST['billing_phone']));
+        // Mobile phone input filed which is used in WooCommerce
         update_user_meta($customer_id, 'billing_phone', sanitize_text_field($_POST['billing_phone']));
+    }
+    if (isset($_POST['role'])) {
+        if ($_POST['role'] == 'affiliate') {
+            $user = new WP_User($customer_id);
+            $user->set_role('affiliate');
+        }
+        if ($_POST['role'] == 'brandpartner') {
+            $user = new WP_User($customer_id);
+            $user->set_role('brandpartner');
+        }
     }
 }
 
-
 /**
- * @snippet       ADD PHONE NUMBER TO MY ACCOUNT - EDIT FORM
+ * @snippet       ADD MOBILE NUMBER FIELD TO MY ACCOUNT - EDIT FORM
  * @author        LoicTheAztec
  * @compatible    WooCommerce 4.9
  * @source        https://stackoverflow.com/questions/51103458/add-a-mobile-phone-field-on-my-account-edit-account-in-woocommerce
  */
 
-/*
 // Display the mobile phone field
 // add_action( 'woocommerce_edit_account_form_start', 'add_billing_mobile_phone_to_edit_account_form' ); // At start
-add_action( 'woocommerce_edit_account_form', 'add_billing_mobile_phone_to_edit_account_form' ); // After existing fields
-function add_billing_mobile_phone_to_edit_account_form() {
+/*
+add_action('woocommerce_edit_account_form', 'add_phone_to_edit_account_form'); // After existing fields
+function add_phone_to_edit_account_form()
+{
     $user = wp_get_current_user();
-    ?>
-     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="billing_mobile_phone"><?php _e( 'Mobile phone', 'woocommerce' ); ?> <span class="required">*</span></label>
-        <input type="text" class="woocommerce-Input woocommerce-Input--phone input-text" name="billing_mobile_phone" id="billing_mobile_phone" value="<?php echo esc_attr( $user->billing_mobile_phone ); ?>" />
+?>
+    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+        <label for="reg_phone"><?php _e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?> <span class="required">*</span></label>
+        <input type="tel" class="woocommerce-Input woocommerce-Input--phone input-text" name="phone" pattern="\+\d{5,}" id="reg_phone" value="<?php echo esc_attr($user->phone); ?>" />
     </p>
-    <?php
+<?php
 }
 */
 
+
 // Check and validate the mobile phone
-add_action('woocommerce_save_account_details_errors', 'billing_mobile_phone_field_validation', 20, 1);
-function billing_mobile_phone_field_validation($args)
+add_action('woocommerce_save_account_details_errors', 'phone_field_validation', 20, 1);
+function phone_field_validation($args)
 {
-    if (isset($_POST['billing_mobile_phone']) && empty($_POST['billing_mobile_phone']))
-        $args->add('error', __('Please fill in your Mobile phone', 'woocommerce'), '');
+    if (isset($_POST['phone']) && empty($_POST['phone']))
+        $args->add('error', __('Please fill in your mobile phone', 'woocommerce'), '');
 }
 
 // Save the mobile phone value to user data
-add_action('woocommerce_save_account_details', 'my_account_saving_billing_mobile_phone', 20, 1);
-function my_account_saving_billing_mobile_phone($user_id)
+add_action('woocommerce_save_account_details', 'my_account_saving_phone', 20, 1);
+function my_account_saving_phone($user_id)
 {
-    if (isset($_POST['billing_mobile_phone']) && !empty($_POST['billing_mobile_phone']))
-        update_user_meta($user_id, 'billing_mobile_phone', sanitize_text_field($_POST['billing_mobile_phone']));
+    if (isset($_POST['phone']) && !empty($_POST['phone']))
+        update_user_meta($user_id, 'phone', sanitize_text_field($_POST['phone']));
 }

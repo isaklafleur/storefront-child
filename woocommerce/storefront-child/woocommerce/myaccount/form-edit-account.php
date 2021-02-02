@@ -44,10 +44,15 @@ do_action('woocommerce_before_edit_account_form'); ?>
         <label for="account_email"><?php esc_html_e('Email address', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
         <input type="email" class="woocommerce-Input woocommerce-Input--email input-text" name="account_email" id="account_email" autocomplete="email" value="<?php echo esc_attr($user->user_email); ?>" />
     </p>
-
+    <!--
     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
         <label for="billing_mobile_phone"><?php esc_html_e('Mobile phone', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
         <input type="tel" class="woocommerce-Input woocommerce-Input--phone input-text" name="billing_mobile_phone" id="billing_mobile_phone" value="<?php echo esc_attr($user->billing_mobile_phone); ?>" />
+    </p>
+    -->
+    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+        <label for="reg_phone"><?php _e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?> <span class="required">*</span></label>
+        <input type="tel" class="woocommerce-Input woocommerce-Input--phone input-text" name="phone" pattern="\+\d{5,}" id="reg_phone" value="<?php echo esc_attr($user->phone); ?>" />
     </p>
 
     <fieldset>

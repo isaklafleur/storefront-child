@@ -1,6 +1,44 @@
 <?php
 
 /**
+ * @snippet        Check what user role the user has, if it has user role xxx do this.
+ * @author         Isak Engdahl
+ * @compatible     WC 4.9
+ * @source         
+ */
+
+add_action('woocommerce_single_product_summary', 'woocommerce_check_user_role');
+function woocommerce_check_user_role()
+{
+    $user = wp_get_current_user();
+    if (in_array('brandpartner', (array) $user->roles)) {
+        //The user has the "author" role
+        // Show Role
+        // Show Subscriber Image
+        echo "Welcome Brand Partner";
+    } else {
+        echo "You are not welcome, because you are not a brand partner...";
+    }
+}
+
+/**
+ * @snippet        Change Product Tab Titles and Headings @ WooCommerce Checkout
+ * @author         Misha Rudrastyh
+ * @compatible     WC 4.9
+ * @source         https://rudrastyh.com/woocommerce/rename-product-tabs-and-heading.html
+ */
+
+add_filter('woocommerce_product_tabs', 'rename_reviews_tab');
+function rename_reviews_tab($tabs)
+{
+    global $product;
+    $tabs['reviews']['title'] = 'Reviews & Questions (' . $product->get_review_count() . ') ';
+    return $tabs;
+}
+
+
+
+/**
  * @snippet       Distraction-free Checkout
  * @author        Rodolfo Melogli
  * @compatible    WooCommerce 4.8
