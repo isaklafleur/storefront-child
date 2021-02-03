@@ -209,7 +209,7 @@ function woocommerce_display_username()
 */
 
 /**
- * @snippet       ADD FIRST NAME, LAST NAME, MOBILE NUMBER, SPONSOR ID, CUSTOMER TYPE TO MY ACCOUNT REGISTER FORM
+ * @snippet       ADD FIRST NAME, LAST NAME, MOBILE NUMBER TO MY ACCOUNT REGISTER FORM
  * @author        xxx
  * @compatible    WooCommerce 4.8
  * @source        xxx
@@ -219,7 +219,7 @@ function woocommerce_display_username()
 add_action('woocommerce_register_form_start', 'wooc_extra_register_fields');
 function wooc_extra_register_fields()
 {
-    $isRefUser = !empty($_SESSION['referral_data']) && !empty($_SESSION['referral_data']['id']);
+    $isRefUser = isset($_SESSION['referral_data']) && !empty($_SESSION['referral_data']) && !empty($_SESSION['referral_data']['id']);
     $sponsorId = '';
     if ($isRefUser) {
         $sponsorId = $_SESSION['referral_data']['id'];
@@ -250,6 +250,7 @@ function wooc_extra_register_fields()
     <p class="form-row form-row-last">
         <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" <?php echo ($isRefUser ? 'disabled' : ''); ?> value="<?php echo isset($sponsorId) ? $sponsorId : ""; ?>" />
+
     </p>
     <div class="clear"></div>
 <?php

@@ -1,3 +1,9 @@
+<input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" <?php echo ($isRefUser ? 'disabled' : ''); ?> value="<?php echo isset($sponsorId) ? $sponsorId : ""; ?>" />
+<input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" <? echo ($isRefUser ? 'disabled' : '' )?> value="<?= $sponsorId ?>" />
+<?php echo isset($sponsorId) ? $sponsorId : ""; ?>
+
+
+
 <?php
 
 /**
