@@ -55,7 +55,7 @@ function bbloomer_unset_shipping_when_free_is_available_all_zones($rates, $packa
 
 /**
  * Show an invalid coupon as valid
- * 
+ *
  * @author Ratnakar Dubey <ratnakar.dubey@storeapps.org>
  *
  * @param boolean $is_valid The validity.
@@ -126,8 +126,8 @@ add_action('woocommerce_product_options_general_product_data', 'woocommerce_prod
 function woocommerce_product_custom_fields()
 {
     echo '<div class="options_group mlm_product_volume" style="background-color: #ffcccb;">';
-?>
-<?php
+    ?>
+    <?php
     $args = array(
         'id' => 'mlm_product_volume',
         'label' => __('Product volume', 'woocommerce-mlm'),
@@ -218,7 +218,15 @@ function woocommerce_display_username()
 // Add extra fields to Registration form
 add_action('woocommerce_register_form_start', 'wooc_extra_register_fields');
 function wooc_extra_register_fields()
-{ ?>
+{
+    $isRefUser = !empty($_SESSION['referral_data']) && !empty($_SESSION['referral_data']['id']);
+    $sponsorId = '';
+    if ($isRefUser) {
+        $sponsorId = $_SESSION['referral_data']['id'];
+    } elseif (!empty($_POST['mlmsoftsponsorid'])) {
+        $sponsorId = $_POST['mlmsoftsponsorid'];
+    }
+    ?>
     <p class="form-row form-row-first">
         <label for="reg_billing_first_name"><?php _e('First name', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="text" class="input-text" name="billing_first_name" id="reg_billing_first_name" value="<?php if (!empty($_POST['billing_first_name'])) esc_attr_e($_POST['billing_first_name']); ?>" />
@@ -241,10 +249,10 @@ function wooc_extra_register_fields()
     </p>
     <p class="form-row form-row-last">
         <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?><span class="required">*</span></label>
-        <input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php if (!empty($_POST['mlmsoftsponsorid'])) esc_attr_e($_POST['mlmsoftsponsorid']); ?>" />
+        <input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" <? echo ($isRefUser ? 'disabled' : '')?> value="<?= $sponsorId ?>" />
     </p>
     <div class="clear"></div>
-<?php
+    <?php
 }
 
 // Validate extra fields
