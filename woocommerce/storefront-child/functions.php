@@ -304,6 +304,11 @@ function wooc_save_extra_register_fields($customer_id)
             $user->set_role('brandpartner');
         }
     }
+    if (isset($_POST['sponsorID'])) {
+        // Saves the sponsor id which is a CUSTOM The Untamed field.
+        update_user_meta($customer_id, 'sponsorID', sanitize_text_field($_POST['sponsorID']));
+        // Mobile phone input filed which is used in WooCommerce
+    }
 }
 
 /**
