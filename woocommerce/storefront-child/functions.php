@@ -241,7 +241,7 @@ function wooc_extra_register_fields()
     </p>
     <p class="form-row form-row-last">
         <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?><span class="required">*</span></label>
-        <input type="text" class="input-text" name="sponsorID" id="reg_sponsorID" value="<?php if (!empty($_POST['sponsorID'])) esc_attr_e($_POST['sponsorID']); ?>" />
+        <input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php if (!empty($_POST['mlmsoftsponsorid'])) esc_attr_e($_POST['mlmsoftsponsorid']); ?>" />
     </p>
     <div class="clear"></div>
 <?php
