@@ -219,13 +219,14 @@ function woocommerce_display_username()
 add_action('woocommerce_register_form_start', 'wooc_extra_register_fields');
 function wooc_extra_register_fields()
 {
-    $isRefUser = !empty($_SESSION['referral_data']) && !empty($_SESSION['referral_data']['id']);
+    $isRefUser = isset($_SESSION['referral_data']) && !empty($_SESSION['referral_data']) && !empty($_SESSION['referral_data']['id']);
     $sponsorId = '';
     if ($isRefUser) {
         $sponsorId = $_SESSION['referral_data']['id'];
     } elseif (!empty($_POST['mlmsoftsponsorid'])) {
         $sponsorId = $_POST['mlmsoftsponsorid'];
     }
+    $rowClass = $isRefUser ? 'form-row-wide' : 'form-row-first';
     ?>
     <p class="form-row form-row-first">
         <label for="reg_billing_first_name"><?php _e('First name', 'woocommerce'); ?><span class="required">*</span></label>
@@ -239,7 +240,7 @@ function wooc_extra_register_fields()
         <label for="reg_billing_phone"><?php _e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="tel" class="input-text" name="billing_phone" id="reg_billing_phone" pattern="\+\d{5,}" value="<?php if (!empty($_POST['billing_phone'])) esc_attr_e($_POST['billing_phone']); ?>" />
     </p>
-    <p class="form-row form-row-first">
+    <p class="form-row <?php echo $rowClass ?>">
         <label for="reg_role"><?php _e('Customer, Affiliate or Brand Partner?', 'woocommerce'); ?><span class="required">*</span></label>
         <select class="input-text" name="role" id="reg_role">
             <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'customer') esc_attr_e('selected'); ?> value="customer">Customer</option>
@@ -247,10 +248,18 @@ function wooc_extra_register_fields()
             <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'brandpartner') esc_attr_e('selected'); ?> value="brandpartner">Brand Partner</option>
         </select>
     </p>
-    <p class="form-row form-row-last">
-        <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?><span class="required">*</span></label>
-        <input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" <? echo ($isRefUser ? 'disabled' : '')?> value="<?= $sponsorId ?>" />
-    </p>
+    <?php
+    if ($isRefUser) { ?>
+        <input type="hidden" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
+        <?php
+    } else { ?>
+        <p class="form-row form-row-last">
+            <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?><span class="required">*</span></label>
+            <input type="number" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
+        </p>
+        <?php
+    }?>
+    <input type="hidden" class="input-text" name="billing_country" id="billing_country" value="SE" />
     <div class="clear"></div>
     <?php
 }
