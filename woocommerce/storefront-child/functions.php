@@ -254,7 +254,7 @@ function wooc_extra_register_fields()
         <?php
     } else { ?>
         <p class="form-row form-row-last">
-            <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?><span class="required">*</span></label>
+            <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?></label>
             <input type="number" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
         </p>
         <?php
@@ -272,19 +272,16 @@ function wooc_validate_extra_register_fields($username, $email, $validation_erro
         $validation_errors->add('billing_first_name_error', __('First name is required.', 'woocommerce'));
     }
     if (isset($_POST['billing_last_name']) && empty($_POST['billing_last_name'])) {
-
         $validation_errors->add('billing_last_name_error', __('Last name is required.', 'woocommerce'));
     }
     if (isset($_POST['billing_phone']) && empty($_POST['billing_phone'])) {
-
         $validation_errors->add('billing_phone_error', __('Mobile phone is required.', 'woocommerce'));
     }
     if (isset($_POST['role']) && empty($_POST['role'])) {
         $validation_errors->add('role_error', __('Role is required.', 'woocommerce'));
     }
-    if (isset($_POST['sponsorID']) && empty($_POST['sponsorID'])) {
-
-        $validation_errors->add('sponsorID_error', __('Sponsor ID is required.', 'woocommerce'));
+    if (isset($_POST['mlmsoftsponsorid']) && empty($_POST['mlmsoftsponsorid'])) {
+        $_REQUEST['mlmsoftsponsorid'] = '1';
     }
     return $validation_errors;
 }
@@ -305,6 +302,9 @@ function wooc_save_extra_register_fields($customer_id)
         // Last name field which is used in WooCommerce
         update_user_meta($customer_id, 'billing_last_name', sanitize_text_field($_POST['billing_last_name']));
     }
+    $user = get_userdata($customer_id);
+    $user->display_name = $user->first_name . ' ' . $user->last_name;
+    wp_update_user($user);
     if (isset($_POST['billing_phone'])) {
         // Mobile phone input filed which is a CUSTOM The Untamed Field.
         update_user_meta($customer_id, 'phone', sanitize_text_field($_POST['billing_phone']));
@@ -369,4 +369,14 @@ function my_account_saving_phone_birthdate($user_id)
     if (isset($_POST['birthdate']) && !empty($_POST['birthdate'])) {
         update_user_meta($user_id, 'birthdate', sanitize_text_field($_POST['birthdate']));
     }
+}
+
+// Set "required" option to false in sponsor id field
+add_action('woocommerce_checkout_fields', 'mlmsoft_woocommerce_checkout_fields', 20, 1);
+function mlmsoft_woocommerce_checkout_fields($fields)
+{
+    if (isset($fields['account']['mlmsoftsponsorid'])) {
+        $fields['account']['mlmsoftsponsorid']['required'] = false;
+    }
+    return $fields;
 }
