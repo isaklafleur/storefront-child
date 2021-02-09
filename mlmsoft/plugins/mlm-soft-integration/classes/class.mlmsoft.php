@@ -70,6 +70,7 @@ class MlmSoft
             add_filter('woocommerce_new_customer_data', array($this, 'woocommerce_new_customer_data'), 10, 2);
             add_action('woocommerce_created_customer', array($this, 'woocommerce_created_customer'), 10, 3);
             add_action('woocommerce_save_account_details', array($this, 'woocommerce_save_account_details'), 10, 1);
+            add_action('woocommerce_checkout_order_created', array($this, 'woocommerce_checkout_order_created'), 10, 1);
         }
     }
 
@@ -730,11 +731,11 @@ class MlmSoft
         }
     }
 
-    public function woocommerce_save_account_details($userId)
+    private function getMlmSoftUserId($wpUserId)
     {
-        $accountId = get_user_meta($userId, 'account_id');
+        $accountId = get_user_meta($wpUserId, 'account_id');
         if (empty($accountId)) {
-            return;
+            return 0;
         }
         $accountId = (int)$accountId[0];
         $reqRes = new MlmSoftApiResponse($this->apiClient->execGet(
@@ -744,10 +745,18 @@ class MlmSoft
             )
         ));
         if (!$reqRes->isPrimarySuccess()) {
-            return;
+            return 0;
         }
         $accountInfo = $reqRes->getPrimaryPayload();
-        $userId = $accountInfo->list->$accountId->{'s.'}->user_id;
+        return $accountInfo->list->$accountId->{'s.'}->user_id;
+    }
+
+    public function woocommerce_save_account_details($userId)
+    {
+        $userId = $this->getMlmSoftUserId($userId);
+        if (!$userId) {
+            return;
+        }
         $reqRes = new MlmSoftApiResponse($this->apiClient->execPost(
             '/api2/online-office/user/profile-update',
             [
@@ -778,5 +787,27 @@ class MlmSoft
                 wc_add_notice('Error updating user password', 'error');
             }
         }
+    }
+
+    public function woocommerce_checkout_order_created($order)
+    {
+        $billingData = $order->data['billing'];
+        $dataToUpdate = [
+            'Mailing_address' => $billingData['address_1'] . ' ' . $billingData['address_2'],
+            'Postal/ZIP_code' => $billingData['postcode'],
+            'countryId' => $billingData['country'],
+            'firstname' => $billingData['first_name'],
+            'lastname' => $billingData['last_name'],
+            'email' => $billingData['email'],
+            'phone' => $billingData['phone']
+        ];
+        $userId = $this->getMlmSoftUserId($order->data['customer_id']);
+        new MlmSoftApiResponse($this->apiClient->execPost(
+            '/api2/online-office/user/profile-update',
+            [
+                'userId' => $userId,
+                "profile" => $dataToUpdate
+            ]
+        ));
     }
 }
