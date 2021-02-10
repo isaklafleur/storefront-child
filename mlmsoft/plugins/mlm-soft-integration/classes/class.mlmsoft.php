@@ -184,6 +184,23 @@ class MlmSoft
                 return $user_id;
             }
         } else {
+            $userMeta = get_user_meta($user->ID);
+            $billingAddress = [];
+            $billingAddress[] = empty($userMeta['billing_address_1']) ? '' : $userMeta['billing_address_1'][0];
+            $billingAddress[] = empty($userMeta['billing_address_2']) ? '' : $userMeta['billing_address_2'][0];
+            $billingAddress = implode(' ', $billingAddress);
+            $dataToUpdate = [
+                'Mailing_address' => $billingAddress,
+                'Postal/ZIP_code' => empty($userMeta['billing_postcode']) ? '' : $userMeta['billing_postcode'][0],
+                'countryId' => empty($userMeta['billing_country']) ? '' : $userMeta['billing_country'][0],
+                'firstname' => $user->first_name,
+                'lastname' => $user->last_name,
+                'email' => $user->user_email,
+                'phone' => empty($userMeta['phone']) ? '' : $userMeta['phone'][0],
+                'birth_date' => empty($userMeta['birthdate']) ? '' : $userMeta['birthdate'][0],
+                'billing_city' => empty($userMeta['billing_city']) ? '' : $userMeta['billing_city'][0]
+            ];
+            $this->updateUserProfile($user->ID, $dataToUpdate);
             //update_user_meta($user->data->ID, 'invite_code', $openid_fields['invite_code']);
             return $user;
         }
@@ -226,6 +243,7 @@ class MlmSoft
             $referral['id'] = $data->account->id;
             $referral['invite_code'] = $data->inviteCode;
             $referral['data'] = json_encode($data);
+            $referral['show_banner'] = isset($_GET['showbanner']);;
         }
 
         return $referral;
@@ -341,17 +359,17 @@ class MlmSoft
 
         if (!is_user_logged_in()) {
 
-            if ($this->options['automatic_affiliate_header']['value']) {
+            if ($this->options['automatic_affiliate_header']['value'] && isset($_SESSION['referral_data']) && $_SESSION['referral_data']['show_banner']) {
                 $fullName = $this->mlmsoft_referral('fullName');
                 $invite_code = $this->mlmsoft_referral('invite_code');
 
                 if ($fullName) {
                     ?>
-                    <div style="background: #000000; opacity: 0.5; width: 100%;  color:#ffffff; position: fixed; top:0px; z-index: 50; padding:20px;">
-                        Opportunity presented by: <?php echo $fullName; ?>
-                        <span style="float:right"><a style="color:#ffffff;" href="/wp-login.php">Sign In</a></span>
+                    <div style="background: #000000; opacity: 0.5; width: 100%;  color:#ffffff; position: fixed; top:0px; z-index: 5000; padding:20px;">
+                        <?php echo $fullName; ?>
+                        <span style="float:right"><a style="color:#ffffff;" href="/my-account">Sign In</a></span>
                         <span style="margin-right:10px; float:right"><a style="color:#ffffff;"
-                                                                        href="/wp-login.php?action=register&referral=<?php echo $invite_code; ?>">Register</a></span>
+                                                                        href="/my-account?referral=<?php echo $invite_code; ?>">Register</a></span>
                     </div>
                     <?php
                 }
@@ -751,26 +769,47 @@ class MlmSoft
         return $accountInfo->list->$accountId->{'s.'}->user_id;
     }
 
-    public function woocommerce_save_account_details($userId)
+    private function updateUserProfile($wpUserId, $profile, $userId = -1)
     {
-        $userId = $this->getMlmSoftUserId($userId);
+        if ($userId <= 0) {
+            $userId = $this->getMlmSoftUserId($wpUserId);
+        }
         if (!$userId) {
-            return;
+            return false;
         }
         $reqRes = new MlmSoftApiResponse($this->apiClient->execPost(
             '/api2/online-office/user/profile-update',
             [
                 'userId' => $userId,
-                "profile" => array(
-                    "firstname" => sanitize_text_field(stripslashes($_REQUEST['account_first_name'])),
-                    "lastname" => sanitize_text_field(stripslashes($_REQUEST['account_last_name'])),
-                    "email" => sanitize_text_field(stripslashes($_REQUEST['account_email'])),
-                    "phone" => sanitize_text_field(stripslashes($_REQUEST['phone'])),
-                    'birth_date' => sanitize_text_field(stripslashes($_REQUEST['birthdate']))
-                )
+                'profile' => $profile
             ]
         ));
-        if (!$reqRes->isPrimarySuccess()) {
+        return $reqRes->isPrimarySuccess();
+    }
+
+    public function woocommerce_save_account_details($wpUserId)
+    {
+        $userId = $this->getMlmSoftUserId($wpUserId);
+        if (!$userId) {
+            return;
+        }
+        $userMeta = get_user_meta($wpUserId);
+        $billingAddress = [];
+        $billingAddress[] = empty($userMeta['billing_address_1']) ? '' : $userMeta['billing_address_1'][0];
+        $billingAddress[] = empty($userMeta['billing_address_2']) ? '' : $userMeta['billing_address_2'][0];
+        $billingAddress = implode(' ', $billingAddress);
+        $dataToUpdate = [
+            'Mailing_address' => $billingAddress,
+            'Postal/ZIP_code' => empty($userMeta['billing_postcode']) ? '' : $userMeta['billing_postcode'][0],
+            'countryId' => empty($userMeta['billing_country']) ? '' : $userMeta['billing_country'][0],
+            'firstname' => sanitize_text_field(stripslashes($_REQUEST['account_first_name'])),
+            'lastname' => sanitize_text_field(stripslashes($_REQUEST['account_last_name'])),
+            'email' => sanitize_text_field(stripslashes($_REQUEST['account_email'])),
+            'phone' => sanitize_text_field(stripslashes($_REQUEST['phone'])),
+            'birth_date' => sanitize_text_field(stripslashes($_REQUEST['birthdate'])),
+            'billing_city' => empty($userMeta['billing_city']) ? '' : $userMeta['billing_city'][0]
+        ];
+        if (!$this->updateUserProfile($wpUserId, $dataToUpdate, $userId)) {
             wc_add_notice('Error updating user profile', 'error');
             return;
         }
@@ -799,15 +838,9 @@ class MlmSoft
             'firstname' => $billingData['first_name'],
             'lastname' => $billingData['last_name'],
             'email' => $billingData['email'],
-            'phone' => $billingData['phone']
+            'phone' => $billingData['phone'],
+            'billing_city' => $billingData['city']
         ];
-        $userId = $this->getMlmSoftUserId($order->data['customer_id']);
-        new MlmSoftApiResponse($this->apiClient->execPost(
-            '/api2/online-office/user/profile-update',
-            [
-                'userId' => $userId,
-                "profile" => $dataToUpdate
-            ]
-        ));
+        $this->updateUserProfile($order->data['customer_id'], $dataToUpdate);
     }
 }
