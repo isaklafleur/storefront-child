@@ -73,6 +73,21 @@ function storeapps_wc_sc_show_as_valid($is_valid = false, $args = array())
     return $is_valid;
 }
 
+/**
+ * @snippet       Move Email Field To Top @ Checkout Page
+ * @author        Rodolfo Melogli
+ * @compatible    Woo 4.9
+ * @source     https://www.businessbloomer.com/woocommerce-move-email-field-to-top-checkout/
+ */
+
+add_filter('woocommerce_billing_fields', 'bbloomer_move_checkout_email_field');
+
+function bbloomer_move_checkout_email_field($address_fields)
+{
+    $address_fields['billing_email']['priority'] = 1;
+    return $address_fields;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // ACTIONS
