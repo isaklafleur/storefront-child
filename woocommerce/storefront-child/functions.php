@@ -88,6 +88,23 @@ function bbloomer_move_checkout_email_field($address_fields)
     return $address_fields;
 }
 
+/**
+ * @snippet       Removing company name from WooCommerce checkout
+ * @author        James Thomas
+ * @compatible    Woo 4.9
+ * @source        https://squareinternet.co/removing-company-name-from-woocommerce-checkout/#:~:text=hooks%20and%20filters.-,To%20remove%20the%20company%20name%20field%20from%20the%20WooCommerce%20checkout,field%20from%20the%20array%20returned.
+
+ */
+
+
+add_filter('woocommerce_checkout_fields', 'remove_company_name');
+
+function remove_company_name($fields)
+{
+    unset($fields['billing']['billing_company']);
+    return $fields;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // ACTIONS
