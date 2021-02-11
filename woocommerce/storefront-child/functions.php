@@ -105,6 +105,24 @@ function remove_company_name($fields)
     return $fields;
 }
 
+/**
+ * @snippet       Hide the coupon code field on the WooCommerce Cart page
+ * @author        Komal Maru
+ * @compatible    Woo 4.9
+ * @source        https://www.tychesoftwares.com/how-to-hide-the-woocommerce-coupon-code-field/#:~:text=The%20store%20owner%20can%20disable,%3ESettings%2D%3EGeneral%20tab.
+
+ */
+
+add_filter('woocommerce_coupons_enabled', 'disable_coupon_field_on_cart');
+
+function disable_coupon_field_on_cart($enabled)
+{
+    if (is_cart()) {
+        $enabled = false;
+    }
+    return $enabled;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // ACTIONS
