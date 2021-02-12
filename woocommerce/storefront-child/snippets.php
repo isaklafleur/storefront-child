@@ -1,10 +1,40 @@
-<input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" <?php echo ($isRefUser ? 'disabled' : ''); ?> value="<?php echo isset($sponsorId) ? $sponsorId : ""; ?>" />
-<input type="text" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" <? echo ($isRefUser ? 'disabled' : '' )?> value="<?= $sponsorId ?>" />
-<?php echo isset($sponsorId) ? $sponsorId : ""; ?>
-
-
-
 <?php
+
+/**
+ * @snippet       Display logged-in username IF logged-in
+ * @author        Travis Pflanz
+ * @compatible    WooCommerce 4.8
+ * @source        https://wordpress.stackexchange.com/a/49688/200418
+ */
+
+// Display $current_user variable data
+function woocommerce_display_username()
+{
+    global $current_user;
+    wp_get_current_user();
+    if (is_user_logged_in()) {
+        //var_dump($current_user);
+        echo 'Username: ' . $current_user->user_login . "\n";
+        echo 'User display name: ' . $current_user->display_name . "\n";
+    } else {
+        wp_loginout();
+    }
+}
+
+/**
+ * @snippet       Move Email Field To Top @ Checkout Page
+ * @author        Rodolfo Melogli
+ * @compatible    Woo 4.9
+ * @source     https://www.businessbloomer.com/woocommerce-move-email-field-to-top-checkout/
+ */
+
+add_filter('woocommerce_billing_fields', 'bbloomer_move_checkout_email_field');
+
+function bbloomer_move_checkout_email_field($address_fields)
+{
+    $address_fields['billing_email']['priority'] = 1;
+    return $address_fields;
+}
 
 /**
  * @snippet        Check what user role the user has, if it has user role xxx do this.

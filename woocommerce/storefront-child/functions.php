@@ -74,21 +74,6 @@ function storeapps_wc_sc_show_as_valid($is_valid = false, $args = array())
 }
 
 /**
- * @snippet       Move Email Field To Top @ Checkout Page
- * @author        Rodolfo Melogli
- * @compatible    Woo 4.9
- * @source     https://www.businessbloomer.com/woocommerce-move-email-field-to-top-checkout/
- */
-
-add_filter('woocommerce_billing_fields', 'bbloomer_move_checkout_email_field');
-
-function bbloomer_move_checkout_email_field($address_fields)
-{
-    $address_fields['billing_email']['priority'] = 1;
-    return $address_fields;
-}
-
-/**
  * @snippet       Removing company name from WooCommerce checkout
  * @author        James Thomas
  * @compatible    Woo 4.9
@@ -176,8 +161,8 @@ add_action('woocommerce_product_options_general_product_data', 'woocommerce_prod
 function woocommerce_product_custom_fields()
 {
     echo '<div class="options_group mlm_product_volume" style="background-color: #ffcccb;">';
-    ?>
-    <?php
+?>
+<?php
     $args = array(
         'id' => 'mlm_product_volume',
         'label' => __('Product volume', 'woocommerce-mlm'),
@@ -210,7 +195,7 @@ function woocommerce_custom_fields_display()
 {
     $user = wp_get_current_user();
 
-    //Run code is the user is a Brand Partner
+    //Run code if the user is a Brand Partner
     if (in_array('brandpartner', (array) $user->roles)) {
 
 
@@ -234,30 +219,6 @@ function woocommerce_custom_fields_display()
     }
 }
 
-
-/**
- * @snippet       Display logged-in username IF logged-in
- * @author        Travis Pflanz
- * @compatible    WooCommerce 4.8
- * @source        https://wordpress.stackexchange.com/a/49688/200418
- */
-
-/*
- // Display $current_user variable data
-function woocommerce_display_username()
-{
-    global $current_user;
-    wp_get_current_user();
-    if (is_user_logged_in()) {
-        //var_dump($current_user);
-        echo 'Username: ' . $current_user->user_login . "\n";
-        echo 'User display name: ' . $current_user->display_name . "\n";
-    } else {
-        wp_loginout();
-    }
-}
-*/
-
 /**
  * @snippet       ADD FIRST NAME, LAST NAME, MOBILE NUMBER TO MY ACCOUNT REGISTER FORM
  * @author        xxx
@@ -277,7 +238,7 @@ function wooc_extra_register_fields()
         $sponsorId = $_POST['mlmsoftsponsorid'];
     }
     $rowClass = $isRefUser ? 'form-row-wide' : 'form-row-first';
-    ?>
+?>
     <p class="form-row form-row-first">
         <label for="reg_billing_first_name"><?php _e('First name', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="text" class="input-text" name="billing_first_name" id="reg_billing_first_name" value="<?php if (!empty($_POST['billing_first_name'])) esc_attr_e($_POST['billing_first_name']); ?>" />
@@ -301,17 +262,17 @@ function wooc_extra_register_fields()
     <?php
     if ($isRefUser) { ?>
         <input type="hidden" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
-        <?php
+    <?php
     } else { ?>
         <p class="form-row form-row-last">
             <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?></label>
             <input type="number" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
         </p>
-        <?php
-    }?>
+    <?php
+    } ?>
     <input type="hidden" class="input-text" name="billing_country" id="billing_country" value="SE" />
     <div class="clear"></div>
-    <?php
+<?php
 }
 
 // Validate extra fields
@@ -437,44 +398,47 @@ function mlmsoft_woocommerce_checkout_fields($fields)
 }
 
 add_action('woocommerce_cart_totals_after_order_total', 'woocommerce_cart_totals_after_order_total_add_pv', 20, 1);
-function woocommerce_cart_totals_after_order_total_add_pv($arg) {
+function woocommerce_cart_totals_after_order_total_add_pv($arg)
+{
     if (!check_pv_show()) {
         return;
     }
     $totalPV = 0;
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-        $_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+        $_product   = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
         if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_cart_item_visible', true, $cart_item, $cart_item_key)) {
             $pv = $_product->get_meta('mlm_product_volume');
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
         }
     }
-    ?>
+?>
     <tr class="order-total">
-        <th><?php esc_html_e( 'Total PV', 'woocommerce' ); ?></th>
-        <td data-title="<?php esc_attr_e( 'Total PV', 'woocommerce' ); ?>"><b><?php echo $totalPV ?></b></td>
+        <th><?php esc_html_e('Total PV', 'woocommerce'); ?></th>
+        <td data-title="<?php esc_attr_e('Total PV', 'woocommerce'); ?>"><b><?php echo $totalPV ?></b></td>
     </tr>
 <?php
 }
 
-function wc_card_totals_order_total_pv_html() {
+function wc_card_totals_order_total_pv_html()
+{
     if (!check_pv_show()) {
         return;
     }
     $totalPV = 0;
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-        $_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+        $_product   = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
         if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_cart_item_visible', true, $cart_item, $cart_item_key)) {
             $pv = $_product->get_meta('mlm_product_volume');
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
         }
     }
-    ?>
-<b><?php echo $totalPV; ?></b>
+?>
+    <b><?php echo $totalPV; ?></b>
 <?php
 }
 
-function check_pv_show() {
+function check_pv_show()
+{
     $user = wp_get_current_user();
     return in_array('brandpartner', $user->roles);
 }
