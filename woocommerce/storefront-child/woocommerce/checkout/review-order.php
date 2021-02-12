@@ -16,13 +16,19 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+$user = wp_get_current_user();
+$showPV = !in_array('customer', $user->roles);
+
 ?>
 <table class="shop_table woocommerce-checkout-review-order-table">
     <thead>
     <tr>
         <th class="product-name"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
         <th class="product-total"><?php esc_html_e( 'Subtotal', 'woocommerce' ); ?></th>
-        <th class="product-total-pv"><?php esc_html_e( 'Product volume', 'woocommerce' ); ?></th>
+        <?php if ($showPV) { ?>
+            <th class="product-total-pv"><?php esc_html_e( 'Product volume', 'woocommerce' ); ?></th>
+        <?php } ?>
     </tr>
     </thead>
     <tbody>
@@ -43,11 +49,13 @@ defined( 'ABSPATH' ) || exit;
                 <td class="product-total">
                     <?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 </td>
-                <td class="product-total">
-                    <?php
-                    $pv = (int)$_product->get_meta('mlm_product_volume');
-                    echo apply_filters( 'woocommerce_cart_item_subtotal_pv', $cart_item['quantity'] * $pv, $cart_item, $cart_item_key ); // PHPCS: XSS ok.; ?>
-                </td>
+                <?php if ($showPV) { ?>
+                    <td class="product-total">
+                        <?php
+                        $pv = (int)$_product->get_meta('mlm_product_volume');
+                        echo apply_filters( 'woocommerce_cart_item_subtotal_pv', $cart_item['quantity'] * $pv, $cart_item, $cart_item_key ); // PHPCS: XSS ok.; ?>
+                    </td>
+                <?php } ?>
             </tr>
             <?php
         }
@@ -108,7 +116,9 @@ defined( 'ABSPATH' ) || exit;
     <tr class="order-total">
         <th><?php esc_html_e( 'Total', 'woocommerce' ); ?></th>
         <td><?php wc_cart_totals_order_total_html(); ?></td>
-        <td><?php wc_card_totals_order_total_pv_html(); ?></td>
+        <?php if ($showPV) { ?>
+            <td><?php wc_card_totals_order_total_pv_html(); ?></td>
+        <?php } ?>
     </tr>
 
     <?php do_action( 'woocommerce_review_order_after_order_total' ); ?>

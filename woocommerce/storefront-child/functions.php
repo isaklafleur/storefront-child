@@ -438,6 +438,10 @@ function mlmsoft_woocommerce_checkout_fields($fields)
 
 add_action('woocommerce_cart_totals_after_order_total', 'woocommerce_cart_totals_after_order_total_add_pv', 20, 1);
 function woocommerce_cart_totals_after_order_total_add_pv($arg) {
+    $user = wp_get_current_user();
+    if (in_array('customer', $user->roles)) {
+        return;
+    }
     $totalPV = 0;
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
         $_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
@@ -455,6 +459,10 @@ function woocommerce_cart_totals_after_order_total_add_pv($arg) {
 }
 
 function wc_card_totals_order_total_pv_html() {
+    $user = wp_get_current_user();
+    if (in_array('customer', $user->roles)) {
+        return;
+    }
     $totalPV = 0;
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
         $_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );

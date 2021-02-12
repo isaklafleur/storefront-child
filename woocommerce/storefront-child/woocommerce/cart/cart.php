@@ -17,6 +17,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+$user = wp_get_current_user();
+$showPV = !in_array('customer', $user->roles);
+
 do_action( 'woocommerce_before_cart' ); ?>
 
 <form class="woocommerce-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
@@ -29,10 +32,14 @@ do_action( 'woocommerce_before_cart' ); ?>
 				<th class="product-thumbnail">&nbsp;</th>
 				<th class="product-name"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
 				<th class="product-price"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
-				<th class="product-pv"><?php esc_html_e( 'Product volume', 'woocommerce' ); ?></th>
+                <?php if ($showPV) { ?>
+				    <th class="product-pv"><?php esc_html_e( 'Product volume', 'woocommerce' ); ?></th>
+				<?php } ?>
 				<th class="product-quantity"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
 				<th class="product-subtotal"><?php esc_html_e( 'Subtotal', 'woocommerce' ); ?></th>
-				<th class="product-subtotal-pv"><?php esc_html_e( 'Subtotal PV', 'woocommerce' ); ?></th>
+                <?php if ($showPV) { ?>
+				    <th class="product-subtotal-pv"><?php esc_html_e( 'Subtotal PV', 'woocommerce' ); ?></th>
+                <?php } ?>
 			</tr>
 		</thead>
 		<tbody>
@@ -102,12 +109,14 @@ do_action( 'woocommerce_before_cart' ); ?>
 							?>
 						</td>
 
-                        <td class="product-pv" data-title="<?php esc_attr_e( 'Product volume', 'woocommerce' ); ?>">
-                            <?php
-                            $pv = (int)$_product->get_meta('mlm_product_volume');
-                            echo apply_filters( 'woocommerce_cart_item_pv', $pv, $cart_item, $cart_item_key );
-                            ?>
-                        </td>
+                        <?php if ($showPV) { ?>
+                            <td class="product-pv" data-title="<?php esc_attr_e( 'Product volume', 'woocommerce' ); ?>">
+                                <?php
+                                $pv = (int)$_product->get_meta('mlm_product_volume');
+                                echo apply_filters( 'woocommerce_cart_item_pv', $pv, $cart_item, $cart_item_key );
+                                ?>
+                            </td>
+                        <?php } ?>
 
 						<td class="product-quantity" data-title="<?php esc_attr_e( 'Quantity', 'woocommerce' ); ?>">
 						<?php
@@ -136,12 +145,13 @@ do_action( 'woocommerce_before_cart' ); ?>
 								echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // PHPCS: XSS ok.
 							?>
 						</td>
-
-                        <td class="product-subtotal-pv" data-title="<?php esc_attr_e( 'Subtotal PV', 'woocommerce' ); ?>">
-                            <?php
-                            echo apply_filters( 'woocommerce_cart_item_subtotal_pv', $cart_item['quantity'] * $pv, $cart_item, $cart_item_key ); // PHPCS: XSS ok.
-                            ?>
-                        </td>
+                        <?php if ($showPV) { ?>
+                            <td class="product-subtotal-pv" data-title="<?php esc_attr_e( 'Subtotal PV', 'woocommerce' ); ?>">
+                                <?php
+                                echo apply_filters( 'woocommerce_cart_item_subtotal_pv', $cart_item['quantity'] * $pv, $cart_item, $cart_item_key ); // PHPCS: XSS ok.
+                                ?>
+                            </td>
+                        <?php } ?>
 					</tr>
 					<?php
 				}
@@ -151,7 +161,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 			<?php do_action( 'woocommerce_cart_contents' ); ?>
 
 			<tr>
-				<td colspan="6" class="actions">
+				<td colspan="<?php echo ($showPV ? 8 : 6) ?>>" class="actions">
 
 					<?php if ( wc_coupons_enabled() ) { ?>
 						<div class="coupon">
