@@ -435,3 +435,35 @@ function mlmsoft_woocommerce_checkout_fields($fields)
     }
     return $fields;
 }
+
+add_action('woocommerce_cart_totals_after_order_total', 'woocommerce_cart_totals_after_order_total_add_pv', 20, 1);
+function woocommerce_cart_totals_after_order_total_add_pv($arg) {
+    $totalPV = 0;
+    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+        $_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+        if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_cart_item_visible', true, $cart_item, $cart_item_key)) {
+            $pv = $_product->get_meta('mlm_product_volume');
+            $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
+        }
+    }
+    ?>
+    <tr class="order-total">
+        <th><?php esc_html_e( 'Total PV', 'woocommerce' ); ?></th>
+        <td data-title="<?php esc_attr_e( 'Total PV', 'woocommerce' ); ?>"><b><?php echo $totalPV ?></b></td>
+    </tr>
+<?php
+}
+
+function wc_card_totals_order_total_pv_html() {
+    $totalPV = 0;
+    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+        $_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+        if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_cart_item_visible', true, $cart_item, $cart_item_key)) {
+            $pv = $_product->get_meta('mlm_product_volume');
+            $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
+        }
+    }
+    ?>
+<b><?php echo $totalPV; ?></b>
+<?php
+}

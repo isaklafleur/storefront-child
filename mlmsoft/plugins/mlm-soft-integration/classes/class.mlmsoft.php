@@ -597,6 +597,9 @@ class MlmSoft
                 if (!empty($this->options['product_volume_attr']['value'])) {
                     $quantity = $item->get_quantity();
                     $value = $product->get_attribute($this->options['product_volume_attr']['value']);
+                    if (!$value && $value !== '0') {
+                        $value = $product->get_meta($this->options['product_volume_attr']['value']);
+                    }
                     $pointsAmount += $quantity * $value;
                 }
                 if (!empty($this->options['rank_property_alias']['value']) && !empty($skuRankValues)) {
