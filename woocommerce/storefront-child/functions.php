@@ -73,6 +73,56 @@ function storeapps_wc_sc_show_as_valid($is_valid = false, $args = array())
     return $is_valid;
 }
 
+/**
+ * @snippet       Move Email Field To Top @ Checkout Page
+ * @author        Rodolfo Melogli
+ * @compatible    Woo 4.9
+ * @source     https://www.businessbloomer.com/woocommerce-move-email-field-to-top-checkout/
+ */
+
+add_filter('woocommerce_billing_fields', 'bbloomer_move_checkout_email_field');
+
+function bbloomer_move_checkout_email_field($address_fields)
+{
+    $address_fields['billing_email']['priority'] = 1;
+    return $address_fields;
+}
+
+/**
+ * @snippet       Removing company name from WooCommerce checkout
+ * @author        James Thomas
+ * @compatible    Woo 4.9
+ * @source        https://squareinternet.co/removing-company-name-from-woocommerce-checkout/#:~:text=hooks%20and%20filters.-,To%20remove%20the%20company%20name%20field%20from%20the%20WooCommerce%20checkout,field%20from%20the%20array%20returned.
+
+ */
+
+
+add_filter('woocommerce_checkout_fields', 'remove_company_name');
+
+function remove_company_name($fields)
+{
+    unset($fields['billing']['billing_company']);
+    return $fields;
+}
+
+/**
+ * @snippet       Hide the coupon code field on the WooCommerce Cart page
+ * @author        Komal Maru
+ * @compatible    Woo 4.9
+ * @source        https://www.tychesoftwares.com/how-to-hide-the-woocommerce-coupon-code-field/#:~:text=The%20store%20owner%20can%20disable,%3ESettings%2D%3EGeneral%20tab.
+
+ */
+
+add_filter('woocommerce_coupons_enabled', 'disable_coupon_field_on_cart');
+
+function disable_coupon_field_on_cart($enabled)
+{
+    if (is_cart()) {
+        $enabled = false;
+    }
+    return $enabled;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // ACTIONS
@@ -320,6 +370,11 @@ function wooc_save_extra_register_fields($customer_id)
             $user = new WP_User($customer_id);
             $user->set_role('brandpartner');
         }
+    }
+    if (isset($_POST['sponsorID'])) {
+        // Saves the sponsor id which is a CUSTOM The Untamed field.
+        update_user_meta($customer_id, 'sponsorID', sanitize_text_field($_POST['sponsorID']));
+        // Mobile phone input filed which is used in WooCommerce
     }
 }
 

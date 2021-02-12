@@ -39,7 +39,17 @@ $allowed_html = array(
 	);
 	?>
 </p>
-
+<?php
+$user = wp_get_current_user();
+$allowed_roles = array('affiliate', 'brandpartner');
+if (array_intersect($allowed_roles, $user->roles)) {
+	// Stuff here for allowed roles (Affiliates & Brand Partners)
+?>
+	<p>
+		<!-- If user is logged in on WooCommerce, is it possible to log in the user automatic here? //Isak -->
+		<a href="https://lbrty.onlineoffice.pro/" target="_blank" rel="noopener">Go to your Online Back Office</a>
+	</p>
+<?php } ?>
 <p>
 	<?php
 	/* translators: 1: Orders URL 2: Address URL 3: Account URL. */
