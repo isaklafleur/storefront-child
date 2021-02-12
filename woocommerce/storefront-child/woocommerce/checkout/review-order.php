@@ -17,8 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$user = wp_get_current_user();
-$showPV = !in_array('customer', $user->roles);
+$showPV = check_pv_show();
 
 ?>
 <table class="shop_table woocommerce-checkout-review-order-table">

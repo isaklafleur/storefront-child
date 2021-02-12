@@ -438,8 +438,7 @@ function mlmsoft_woocommerce_checkout_fields($fields)
 
 add_action('woocommerce_cart_totals_after_order_total', 'woocommerce_cart_totals_after_order_total_add_pv', 20, 1);
 function woocommerce_cart_totals_after_order_total_add_pv($arg) {
-    $user = wp_get_current_user();
-    if (in_array('customer', $user->roles)) {
+    if (!check_pv_show()) {
         return;
     }
     $totalPV = 0;
@@ -459,8 +458,7 @@ function woocommerce_cart_totals_after_order_total_add_pv($arg) {
 }
 
 function wc_card_totals_order_total_pv_html() {
-    $user = wp_get_current_user();
-    if (in_array('customer', $user->roles)) {
+    if (!check_pv_show()) {
         return;
     }
     $totalPV = 0;
@@ -474,4 +472,9 @@ function wc_card_totals_order_total_pv_html() {
     ?>
 <b><?php echo $totalPV; ?></b>
 <?php
+}
+
+function check_pv_show() {
+    $user = wp_get_current_user();
+    return in_array('brandpartner', $user->roles);
 }

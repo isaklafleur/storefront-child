@@ -17,8 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$user = wp_get_current_user();
-$showPV = !in_array('customer', $user->roles);
+$showPV = check_pv_show();
 
 do_action( 'woocommerce_before_cart' ); ?>
 
