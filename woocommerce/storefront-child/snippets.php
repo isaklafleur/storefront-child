@@ -1,6 +1,26 @@
 <?php
 
 /**
+ * Show an invalid coupon as valid
+ *
+ * @author Ratnakar Dubey <ratnakar.dubey@storeapps.org>
+ *
+ * @param boolean $is_valid The validity.
+ * @param array $args Additional arguments.
+ * @return boolean
+ */
+
+add_filter('wc_sc_show_as_valid', 'storeapps_wc_sc_show_as_valid', 100, 2);
+function storeapps_wc_sc_show_as_valid($is_valid = false, $args = array())
+{
+    $coupon = (!empty($args['coupon_obj'])) ? $args['coupon_obj'] : null;
+    if (is_object($coupon) && is_callable(array($coupon, 'is_valid')) && !$coupon->is_valid()) {
+        return true;
+    }
+    return $is_valid;
+}
+
+/**
  * @snippet       Removing company name from WooCommerce checkout
  * @author        James Thomas
  * @compatible    Woo 4.9
