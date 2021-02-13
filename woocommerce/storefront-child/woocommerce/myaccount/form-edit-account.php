@@ -23,7 +23,11 @@ do_action('woocommerce_before_edit_account_form'); ?>
 <form class="woocommerce-EditAccountForm edit-account" action="" method="post" <?php do_action('woocommerce_edit_account_form_tag'); ?>>
 
     <?php do_action('woocommerce_edit_account_form_start'); ?>
-
+    <?php
+    // To customize the file upload code see instructions by the author: https://wordpress.org/plugins/wp-user-avatar/#other_notes
+    //      $current_user_id = get_current_user_id();
+    //        echo do_shortcode("[avatar_upload size='medium' user='aleksandermlmsoft']");
+    ?>
     <p class="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">
         <label for="account_first_name"><?php esc_html_e('First name', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
         <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="account_first_name" id="account_first_name" autocomplete="given-name" value="<?php echo esc_attr($user->first_name); ?>" />
