@@ -193,6 +193,8 @@ function woocommerce_custom_fields_display()
 add_action('woocommerce_register_form_start', 'wooc_extra_register_fields');
 function wooc_extra_register_fields()
 {
+    $location = WC_Geolocation::geolocate_ip();
+    $country = $location['country']; // example "SE"
     $isRefUser = isset($_SESSION['referral_data']) && !empty($_SESSION['referral_data']) && !empty($_SESSION['referral_data']['id']);
     $sponsorId = '';
     if ($isRefUser) {
@@ -233,7 +235,7 @@ function wooc_extra_register_fields()
         </p>
     <?php
     } ?>
-    <input type="hidden" class="input-text" name="billing_country" id="billing_country" value="SE" />
+    <input type="hidden" class="input-text" name="billing_country" id="billing_country" value="<?php echo $country ? $country : 'SE' ?>" />
     <div class="clear"></div>
 <?php
 }
