@@ -399,13 +399,47 @@ function wc_card_totals_order_total_pv_html()
     }
 ?>
     <b><?php echo $totalPV; ?></b>
-<?php
+    <?php
 }
 
 function check_pv_show()
 {
     $user = wp_get_current_user();
     return in_array('brandpartner', $user->roles);
+}
+
+/**
+ * @snippet       Add a profile picture (file upload) on My account > edit account in WooCommerce
+ * @author        7uc1f3r
+ * @compatible    WooCommerce 5.0
+ * @source        https://stackoverflow.com/questions/62016183/add-a-profile-picture-file-upload-on-my-account-edit-account-in-woocommerce
+ */
+
+
+// Display Image on Edit account form.
+add_action('woocommerce_edit_account_form_start', 'display_image');
+function display_image()
+{
+    // Get current user id
+    $user_id = get_current_user_id();
+
+    // Get attachment id
+    $attachment_id = get_user_meta($user_id, 'image', true);
+    // True
+    if ($attachment_id) {
+        // $original_image_url = wp_get_attachment_url($attachment_id);
+
+        // Display Image instead of URL
+    ?>
+        <div class="image-upload">
+            <label for="file-input">
+                <?php echo wp_get_attachment_image($attachment_id, $size = 'thumbnail'); ?>
+                <p class="img__description">Click here to upload new profile photo. Dont forget to click on button Save changes below.</p>
+            </label>
+            <input id="file-input" type="file" name="image" accept="image/x-png,image/gif,image/jpeg">
+        </div>
+    <?php
+    }
 }
 
 
@@ -420,12 +454,19 @@ function check_pv_show()
 add_action('woocommerce_edit_account_form_start', 'action_woocommerce_edit_account_form_start');
 function action_woocommerce_edit_account_form_start()
 {
-?>
-    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="image"><?php esc_html_e('Profile Photo', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
-        <input type="file" class="woocommerce-Input" name="image" accept="image/x-png,image/gif,image/jpeg">
-    </p>
+    // Get current user id
+    $user_id = get_current_user_id();
+
+    // Get attachment id
+    $attachment_id = get_user_meta($user_id, 'image', true);
+    if (!$attachment_id) {
+    ?>
+        <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+            <label for="image"><?php esc_html_e('Profile Image', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
+            <input type="file" class="woocommerce-Input" name="image" accept="image/x-png,image/gif,image/jpeg">
+        </p>
 <?php
+    }
 }
 
 // Validate image upload field
@@ -467,40 +508,3 @@ function action_woocommerce_edit_account_form_tag()
     echo 'enctype="multipart/form-data"';
 }
 add_action('woocommerce_edit_account_form_tag', 'action_woocommerce_edit_account_form_tag');
-
-
-/**
- * @snippet       Delete image
- * @author        Isak Engdahl
- * @compatible    WooCommerce 5.0
- * @source        https://stackoverflow.com/questions/62016183/add-a-profile-picture-file-upload-on-my-account-edit-account-in-woocommerce
- */
-
-
-
-
-/**
- * @snippet       Add a profile picture (file upload) on My account > edit account in WooCommerce
- * @author        7uc1f3r
- * @compatible    WooCommerce 5.0
- * @source        https://stackoverflow.com/questions/62016183/add-a-profile-picture-file-upload-on-my-account-edit-account-in-woocommerce
- */
-
-// Display Image on Edit account form.
-add_action('woocommerce_edit_account_form_start', 'display_image');
-function display_image()
-{
-    // Get current user id
-    $user_id = get_current_user_id();
-
-    // Get attachment id
-    $attachment_id = get_user_meta($user_id, 'image', true);
-    // True
-    if ($attachment_id) {
-        $original_image_url = wp_get_attachment_url($attachment_id);
-
-        // Display Image instead of URL
-        echo wp_get_attachment_image($attachment_id, $size = 'thumbnail');
-    }
-}
-add_action('woocommerce_edit_account_form', 'action_woocommerce_edit_account_form');

@@ -22,3 +22,44 @@ Template: storefront
 a:focus, .focus a {
     outline: none !important;
     }
+
+.image-upload {
+    max-width: 150px;
+}
+.image-upload>input {
+    display: none;
+    }
+
+/* quick reset */
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  
+  /* relevant styles */
+  .image-upload {
+    position: relative;
+    height: 150px;
+    width: 150px;
+  }
+  
+  .img__description {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(29, 106, 154, 0.72);
+    color: #fff;
+    visibility: hidden;
+    opacity: 0;
+  
+    /* transition effect. not necessary */
+    transition: opacity .2s, visibility .2s;
+  }
+  
+  .image-upload:hover .img__description {
+    visibility: visible;
+    opacity: 1;
+  }

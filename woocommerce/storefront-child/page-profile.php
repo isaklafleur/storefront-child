@@ -55,7 +55,21 @@ foreach ($all_roles as $role_key => $role_details) {
 echo $userBySponsorId->first_name . ' ' . $userBySponsorId->last_name . ' is an ' . $current_role_name . '. He lives in ' . $userBySponsorId->billing_city . ' in ' . WC()->countries->countries[$userBySponsorId->billing_country];
 
 // This function uses currently the current users ID, need to change to use id of userBySponsorId.
-display_image();
+// Get current user id
+$user_id = get_current_user_id();
+
+// Get attachment id
+$attachment_id = get_user_meta($user_id, 'image', true);
+// True
+if ($attachment_id) {
+    // $original_image_url = wp_get_attachment_url($attachment_id);
+
+    // Display Image instead of URL
+?>
+    <?php echo wp_get_attachment_image($attachment_id, $size = 'thumbnail'); ?>
+
+<?php
+}
 ?>
 
 <?php
