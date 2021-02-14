@@ -5,7 +5,7 @@ Plugin Name: MLM Soft Integration
 Description: WP integration with mlm-soft.com cloud platform
 Version: 2.1.1
 Author: MLM Soft Ltd.
-Author URI: http://mlm-soft.com
+Author URI: https://mlm-soft.com
 Text Domain: mlmsoft
 License: GPLv2
 */
@@ -26,6 +26,3 @@ require_once( plugin_dir_path( __FILE__ ).'/classes/class.mlmsoftoptions.php');
 require_once( plugin_dir_path( __FILE__ ).'/classes/class.mlmsoft.php');
 
 $MlmSoft = new MlmSoft;
-
-
-?>

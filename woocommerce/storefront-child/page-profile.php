@@ -20,7 +20,13 @@ get_header('shop'); ?>
 </header>
 
 <?php
-$user = get_user_by('id', 1); // this id is the sponsor, the one that send the referal link. So we must store referal code in Wordpress database so we can look it up and get the data from Wordpress instead of MLMSoft.
+// INSTRUCTIONS:
+// It should take the ID of the sponsor who sent the referal URL to the prospect.
+// We must store referal code in Wordpress database and this code should not be able to be changed
+// So we can look it up and get the data from Wordpress instead of MLMSoft.
+// like lbrtybeauty.com/profile/[refidfromsponsor]
+// script should find the sponsor based on this [refidfromsponsor] and display user data from sponsor
+$userBySponsorId = get_user_by('id', 1);
 
 /*
 $user_id = 1;
@@ -38,17 +44,18 @@ $user_last = get_user_meta($user_id, $key, $single);
 echo '<p>The ' . $key . ' value for user id ' . $user_id . ' is: ' . $user_last . '</p>';
 */
 
-// echo WC()->countries->countries['AU']; //To get country name by code
-
-$current_role = $user->roles[0];
+// Find user role of user and display name of user role.
+$current_role = $userBySponsorId->roles[0];
 $all_roles = $wp_roles->roles;
 foreach ($all_roles as $role_key => $role_details) {
     if ($role_key == $current_role) $current_role_name = $role_details['name'];
 }
 
-echo $user->first_name . ' ' . $user->last_name . ' is an ' . $current_role_name . '. He lives in ' . $user->billing_city . ' in ' . WC()->countries->countries[$user->billing_country];
-echo get_wp_user_avatar($user->ID, 'medium');
+// Print out details of sponsor based on the [refidfromsponsor]
+echo $userBySponsorId->first_name . ' ' . $userBySponsorId->last_name . ' is an ' . $current_role_name . '. He lives in ' . $userBySponsorId->billing_city . ' in ' . WC()->countries->countries[$userBySponsorId->billing_country];
 
+// This function uses currently the current users ID, need to change to use id of userBySponsorId.
+display_image();
 ?>
 
 <?php
