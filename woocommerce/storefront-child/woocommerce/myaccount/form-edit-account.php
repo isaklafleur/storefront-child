@@ -51,7 +51,7 @@ do_action('woocommerce_before_edit_account_form'); ?>
 
     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
         <label for="reg_birthdate"><?php esc_html_e('Birthdate', 'woocommerce'); ?> <span class="required">*</span></label>
-        <input type="date" class="woocommerce-Input woocommerce-Input--birthdate input-date" min="1920-01-01" max="2003-01-01" name="birthdate" id="reg_birthdate" value="<?php echo esc_attr($user->birthdate); ?>" />
+        <input type="date" class="woocommerce-Input woocommerce-Input--birthdate input-text" name="birthdate" id="reg_birthdate" value="<?php echo esc_attr($user->birthdate); ?>" />
     </p>
 
 

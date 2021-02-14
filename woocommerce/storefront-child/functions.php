@@ -427,6 +427,7 @@ function display_image()
     $attachment_id = get_user_meta($user_id, 'image', true);
     // True
     if ($attachment_id) {
+        // echo $attachment_id;
         // $original_image_url = wp_get_attachment_url($attachment_id);
 
         // Display Image instead of URL
@@ -488,9 +489,9 @@ function action_woocommerce_save_account_details($user_id)
         require_once(ABSPATH . 'wp-admin/includes/media.php');
 
         $attachment_id = media_handle_upload('image', 0);
-
         if (is_wp_error($attachment_id)) {
-            update_user_meta($user_id, 'image', $_FILES['image'] . ": " . $attachment_id->get_error_message());
+
+            // update_user_meta($user_id, 'image', $_FILES['image'] . ": " . $attachment_id->get_error_message());
         } else {
             $oldAttachment_id = get_user_meta($user_id, 'image', true);
             // True
