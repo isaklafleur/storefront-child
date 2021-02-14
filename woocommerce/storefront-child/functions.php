@@ -451,6 +451,11 @@ function action_woocommerce_save_account_details($user_id)
         if (is_wp_error($attachment_id)) {
             update_user_meta($user_id, 'image', $_FILES['image'] . ": " . $attachment_id->get_error_message());
         } else {
+            $oldAttachment_id = get_user_meta($user_id, 'image', true);
+            // True
+            if ($oldAttachment_id) {
+                wp_delete_attachment($oldAttachment_id, $force_delete);
+            }
             update_user_meta($user_id, 'image', $attachment_id);
         }
     }
@@ -462,6 +467,17 @@ function action_woocommerce_edit_account_form_tag()
     echo 'enctype="multipart/form-data"';
 }
 add_action('woocommerce_edit_account_form_tag', 'action_woocommerce_edit_account_form_tag');
+
+
+/**
+ * @snippet       Delete image
+ * @author        Isak Engdahl
+ * @compatible    WooCommerce 5.0
+ * @source        https://stackoverflow.com/questions/62016183/add-a-profile-picture-file-upload-on-my-account-edit-account-in-woocommerce
+ */
+
+
+
 
 /**
  * @snippet       Add a profile picture (file upload) on My account > edit account in WooCommerce
