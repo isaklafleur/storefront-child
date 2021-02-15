@@ -124,8 +124,8 @@ add_action('woocommerce_product_options_general_product_data', 'woocommerce_prod
 function woocommerce_product_custom_fields()
 {
     echo '<div class="options_group mlm_product_volume" style="background-color: #ffcccb;">';
-?>
-<?php
+    ?>
+    <?php
     $args = array(
         'id' => 'mlm_product_volume',
         'label' => __('Product volume', 'woocommerce-mlm'),
@@ -186,7 +186,7 @@ function woocommerce_custom_fields_display()
  * @snippet       ADD FIRST NAME, LAST NAME, MOBILE NUMBER, MLMSOFTSPONSORID and BILLING_COUNTRY FIELDS TO MY ACCOUNT REGISTER FORM
  * @author        Isak Engdahl & Alex MLMSoft
  * @compatible    WooCommerce 5.0
- * @source        
+ * @source
  */
 
 // Add extra fields to Registration form
@@ -203,7 +203,7 @@ function wooc_extra_register_fields()
         $sponsorId = $_POST['mlmsoftsponsorid'];
     }
     $rowClass = $isRefUser ? 'form-row-wide' : 'form-row-first';
-?>
+    ?>
     <p class="form-row form-row-first">
         <label for="reg_billing_first_name"><?php _e('First name', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="text" class="input-text" name="billing_first_name" id="reg_billing_first_name" value="<?php if (!empty($_POST['billing_first_name'])) esc_attr_e($_POST['billing_first_name']); ?>" />
@@ -227,17 +227,17 @@ function wooc_extra_register_fields()
     <?php
     if ($isRefUser) { ?>
         <input type="hidden" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
-    <?php
+        <?php
     } else { ?>
         <p class="form-row form-row-last">
             <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?></label>
             <input type="number" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
         </p>
-    <?php
+        <?php
     } ?>
     <input type="hidden" class="input-text" name="billing_country" id="billing_country" value="<?php echo $country ? $country : 'SE' ?>" />
     <div class="clear"></div>
-<?php
+    <?php
 }
 
 // Validate extra fields
@@ -356,7 +356,7 @@ function my_account_saving_phone_birthdate($user_id)
  * @snippet       Make sponsorfield optional at checkout page
  * @author        Aleksander MLMSoft
  * @compatible    WooCommerce 5.0
- * @source        
+ * @source
  */
 
 // Set "required" option to false in sponsor id field
@@ -373,7 +373,7 @@ function mlmsoft_woocommerce_checkout_fields($fields)
  * @snippet       Calculate and Display PV per order line and total on cart and checkout page.
  * @author        Aleksander MLMSoft
  * @compatible    WooCommerce 5.0
- * @source        
+ * @source
  */
 
 add_action('woocommerce_cart_totals_after_order_total', 'woocommerce_cart_totals_after_order_total_add_pv', 20, 1);
@@ -390,12 +390,12 @@ function woocommerce_cart_totals_after_order_total_add_pv($arg)
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
         }
     }
-?>
+    ?>
     <tr class="order-total">
         <th><?php esc_html_e('Total PV', 'woocommerce'); ?></th>
         <td data-title="<?php esc_attr_e('Total PV', 'woocommerce'); ?>"><b><?php echo $totalPV ?></b></td>
     </tr>
-<?php
+    <?php
 }
 
 function wc_card_totals_order_total_pv_html()
@@ -411,7 +411,7 @@ function wc_card_totals_order_total_pv_html()
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
         }
     }
-?>
+    ?>
     <b><?php echo $totalPV; ?></b>
     <?php
 }
@@ -445,7 +445,7 @@ function display_image()
         // $original_image_url = wp_get_attachment_url($attachment_id);
 
         // Display Image instead of URL
-    ?>
+        ?>
         <div class="image-upload">
             <label for="file-input">
                 <?php echo wp_get_attachment_image($attachment_id, $size = 'thumbnail'); ?>
@@ -453,7 +453,7 @@ function display_image()
             </label>
             <input id="file-input" type="file" name="image" accept="image/x-png,image/gif,image/jpeg">
         </div>
-    <?php
+        <?php
     }
 }
 
@@ -475,21 +475,34 @@ function action_woocommerce_edit_account_form_start()
     // Get attachment id
     $attachment_id = get_user_meta($user_id, 'image', true);
     if (!$attachment_id) {
-    ?>
+        ?>
         <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
             <label for="image"><?php esc_html_e('Profile Image', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
             <input type="file" class="woocommerce-Input" name="image" accept="image/x-png,image/gif,image/jpeg">
         </p>
-<?php
+        <?php
     }
 }
 
-// Validate image upload field
-add_action('woocommerce_save_account_details_errors', 'action_woocommerce_save_account_details_errors', 10, 1);
+// Validate image upload field (Priority should be maximum)
+add_action('woocommerce_save_account_details_errors', 'action_woocommerce_save_account_details_errors', 1000, 1);
 function action_woocommerce_save_account_details_errors($args)
 {
     if (isset($_POST['image']) && empty($_POST['image'])) {
         $args->add('image_error', __('Please provide a valid image', 'woocommerce'));
+    }
+    if (count($args->errors) == 0 && isset($_FILES['image']) && $_FILES['image']['size'] > 0) {
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+
+        $attachment_id = media_handle_upload('image', 0);
+
+        if (is_wp_error($attachment_id)) {
+            $args->add('image_error', 'Error while uploading the image: ' . $attachment_id->get_error_message());
+        } else {
+            $_REQUEST['account_image_attachment_id'] = $attachment_id;
+        }
     }
 }
 
@@ -497,26 +510,15 @@ function action_woocommerce_save_account_details_errors($args)
 add_action('woocommerce_save_account_details', 'action_woocommerce_save_account_details', 10, 1);
 function action_woocommerce_save_account_details($user_id)
 {
-    if (isset($_FILES['image'])) {
-        require_once(ABSPATH . 'wp-admin/includes/image.php');
-        require_once(ABSPATH . 'wp-admin/includes/file.php');
-        require_once(ABSPATH . 'wp-admin/includes/media.php');
-
-        $attachment_id = media_handle_upload('image', 0);
-        if (is_wp_error($attachment_id)) {
-
-            // update_user_meta($user_id, 'image', $_FILES['image'] . ": " . $attachment_id->get_error_message());
-            // @aleksander if this is not comment out and user change anything else on the form and not upload new image and click save
-            // then profile image, attachment_id is replaced with the error message...
-            // Please see if we can code it better. 
-        } else {
-            $oldAttachment_id = get_user_meta($user_id, 'image', true);
-            // True
-            if ($oldAttachment_id) {
-                wp_delete_attachment($oldAttachment_id, $force_delete);
-            }
-            update_user_meta($user_id, 'image', $attachment_id);
+    if (isset($_REQUEST['account_image_attachment_id']) && $_REQUEST['account_image_attachment_id'] > 0) {
+        $force_delete = true;
+        $attachment_id = $_REQUEST['account_image_attachment_id'];
+        $oldAttachment_id = get_user_meta($user_id, 'image', true);
+        // True
+        if ($oldAttachment_id) {
+            wp_delete_attachment($oldAttachment_id, $force_delete);
         }
+        update_user_meta($user_id, 'image', $attachment_id);
     }
 }
 
