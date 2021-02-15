@@ -9,12 +9,6 @@ Template: storefront
 
 /* --------------- Theme customization starts here ----------------- */
 
-/*
-.site-branding .site-title a {
-    color: red; 
- }
-*/
-
 .site-header .site-search {
     display: none !important;
     }
@@ -77,4 +71,8 @@ a:focus, .focus a {
 
 .my-custom-social i{
    margin-right:10px;
+}
+
+.woocommerce-tabs {
+  padding-top: 0.5em;
 }
