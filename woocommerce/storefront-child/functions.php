@@ -12,7 +12,7 @@
 /**
  * @snippet        Remove Order Notes @ WooCommerce Checkout
  * @author         Rodolfo Melogli
- * @compatible     WC 4.9
+ * @compatible     WooCommerce 5.0
  * @source         https://www.businessbloomer.com/woocommerce-remove-order-notes-checkout-page/
  */
 
@@ -21,7 +21,7 @@ add_filter('woocommerce_enable_order_notes_field', '__return_false');
 /**
  * @snippet       If a store owner wants to force the country display under order page
  * @author        Ron Rennick
- * @compatible    WooCommerce 4.8
+ * @compatible    WooCommerce 5.0
  * @source        https://github.com/woocommerce/woocommerce/issues/22158#issuecomment-447852936
  */
 
@@ -31,7 +31,7 @@ add_filter('woocommerce_formatted_address_force_country_display', '__return_true
 /**
  * @snippet       Hide ALL shipping rates in ALL zones when Free Shipping is available
  * @author        Rodolfo Melogli
- * @compatible    WooCommerce 4.8
+ * @compatible    WooCommerce 5.0
  * @source        https://www.businessbloomer.com/woocommerce-hide-shipping-options-free-shipping-available/
  */
 
@@ -56,7 +56,7 @@ function bbloomer_unset_shipping_when_free_is_available_all_zones($rates, $packa
 /**
  * @snippet       Hide the coupon code field on the WooCommerce Cart page
  * @author        Komal Maru
- * @compatible    Woo 4.9
+ * @compatible    WooCommerce 5.0
  * @source        https://www.tychesoftwares.com/how-to-hide-the-woocommerce-coupon-code-field/#:~:text=The%20store%20owner%20can%20disable,%3ESettings%2D%3EGeneral%20tab.
 
  */
@@ -87,7 +87,7 @@ function njenga_remove_storefront_credit()
 /**
  * @snippet       Remove "Default Sorting" Dropdown @ StoreFront Shop & Archive Pages
  * @author        Rodolfo Melogli
- * @compatible    WooCommerce 4.8
+ * @compatible    WooCommerce 5.0
  * @source        https://businessbloomer.com/bloomer-armada/
  */
 
@@ -101,7 +101,7 @@ function bbloomer_remove_default_sorting_storefront()
 /**
  * @snippet       Remove “Showing all X results” from Shop and Product Archive Pages
  * @author        xxxx
- * @compatible    WooCommerce 4.8
+ * @compatible    WooCommerce 5.0
  * @source    https://rudrastyh.com/woocommerce/remove-result-count.html
  */
 
@@ -115,7 +115,7 @@ function bbloomer_remove_result_count_storefront()
 /**
  * @snippet       Add Product Volume field on product page
  * @author        Rodolfo Melogli
- * @compatible    WooCommerce 4.8
+ * @compatible    WooCommerce 5.0
  * @source        https://www.cloudways.com/blog/add-custom-product-fields-woocommerce/ / https://www.ibenic.com/how-to-add-woocommerce-custom-product-fields / https://woocommerce.github.io/code-reference/files/woocommerce-includes-admin-wc-meta-box-functions.html / https://pluginrepublic.com/woocommerce-custom-fields/
  */
 
@@ -183,10 +183,10 @@ function woocommerce_custom_fields_display()
 }
 
 /**
- * @snippet       ADD FIRST NAME, LAST NAME, MOBILE NUMBER TO MY ACCOUNT REGISTER FORM
- * @author        xxx
- * @compatible    WooCommerce 4.8
- * @source        xxx
+ * @snippet       ADD FIRST NAME, LAST NAME, MOBILE NUMBER, MLMSOFTSPONSORID and BILLING_COUNTRY FIELDS TO MY ACCOUNT REGISTER FORM
+ * @author        Isak Engdahl & Alex MLMSoft
+ * @compatible    WooCommerce 5.0
+ * @source        
  */
 
 // Add extra fields to Registration form
@@ -305,9 +305,9 @@ function wooc_save_extra_register_fields($customer_id)
 }
 
 /**
- * @snippet       ADD MOBILE NUMBER FIELD TO MY ACCOUNT - EDIT FORM
+ * @snippet       ADD MOBILE NUMBER & BIRTHDATE FIELDS TO MY ACCOUNT - EDIT FORM
  * @author        LoicTheAztec
- * @compatible    WooCommerce 4.9
+ * @compatible    WooCommerce 5.0
  * @source        https://stackoverflow.com/questions/51103458/add-a-mobile-phone-field-on-my-account-edit-account-in-woocommerce
  */
 
@@ -352,6 +352,13 @@ function my_account_saving_phone_birthdate($user_id)
     }
 }
 
+/**
+ * @snippet       Make sponsorfield optional at checkout page
+ * @author        Aleksander MLMSoft
+ * @compatible    WooCommerce 5.0
+ * @source        
+ */
+
 // Set "required" option to false in sponsor id field
 add_action('woocommerce_checkout_fields', 'mlmsoft_woocommerce_checkout_fields', 20, 1);
 function mlmsoft_woocommerce_checkout_fields($fields)
@@ -361,6 +368,13 @@ function mlmsoft_woocommerce_checkout_fields($fields)
     }
     return $fields;
 }
+
+/**
+ * @snippet       Calculate and Display PV per order line and total on cart and checkout page.
+ * @author        Aleksander MLMSoft
+ * @compatible    WooCommerce 5.0
+ * @source        
+ */
 
 add_action('woocommerce_cart_totals_after_order_total', 'woocommerce_cart_totals_after_order_total_add_pv', 20, 1);
 function woocommerce_cart_totals_after_order_total_add_pv($arg)
@@ -409,7 +423,7 @@ function check_pv_show()
 }
 
 /**
- * @snippet       Add a profile picture (file upload) on My account > edit account in WooCommerce
+ * @snippet       Add a profile picture (file upload) on My account > edit account in WooCommerce, display image
  * @author        7uc1f3r
  * @compatible    WooCommerce 5.0
  * @source        https://stackoverflow.com/questions/62016183/add-a-profile-picture-file-upload-on-my-account-edit-account-in-woocommerce
@@ -492,6 +506,9 @@ function action_woocommerce_save_account_details($user_id)
         if (is_wp_error($attachment_id)) {
 
             // update_user_meta($user_id, 'image', $_FILES['image'] . ": " . $attachment_id->get_error_message());
+            // @aleksander if this is not comment out and user change anything else on the form and not upload new image and click save
+            // then profile image, attachment_id is replaced with the error message...
+            // Please see if we can code it better. 
         } else {
             $oldAttachment_id = get_user_meta($user_id, 'image', true);
             // True
@@ -509,3 +526,23 @@ function action_woocommerce_edit_account_form_tag()
     echo 'enctype="multipart/form-data"';
 }
 add_action('woocommerce_edit_account_form_tag', 'action_woocommerce_edit_account_form_tag');
+
+
+/**
+ * @snippet       Function to remove coupons details from cart page
+ * @author        Ratnakar Dubey <ratnakar.dubey@storeapps.org>
+ * @compatible    WooCommerce 5.0
+ * @source        Email from Ratnakar
+ */
+
+function storeapps_handle_smart_coupons_hooks()
+{
+    if (!class_exists('WC_SC_Display_Coupons')) {
+        include_once trailingslashit(WP_PLUGIN_DIR . '/' . WC_SC_PLUGIN_DIRNAME) . 'includes/class-wc-sc-display-coupons.php';
+    }
+    $wc_sc_display_coupons = WC_SC_Display_Coupons::get_instance();
+    if (has_action('woocommerce_after_cart_table', array($wc_sc_display_coupons, 'show_available_coupons_after_cart_table'))) {
+        remove_action('woocommerce_after_cart_table', array($wc_sc_display_coupons, 'show_available_coupons_after_cart_table'));
+    }
+}
+add_action('wp_loaded', 'storeapps_handle_smart_coupons_hooks');
