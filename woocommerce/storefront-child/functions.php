@@ -124,8 +124,8 @@ add_action('woocommerce_product_options_general_product_data', 'woocommerce_prod
 function woocommerce_product_custom_fields()
 {
     echo '<div class="options_group mlm_product_volume" style="background-color: #ffcccb;">';
-    ?>
-    <?php
+?>
+<?php
     $args = array(
         'id' => 'mlm_product_volume',
         'label' => __('Product volume', 'woocommerce-mlm'),
@@ -203,7 +203,7 @@ function wooc_extra_register_fields()
         $sponsorId = $_POST['mlmsoftsponsorid'];
     }
     $rowClass = $isRefUser ? 'form-row-wide' : 'form-row-first';
-    ?>
+?>
     <p class="form-row form-row-first">
         <label for="reg_billing_first_name"><?php _e('First name', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="text" class="input-text" name="billing_first_name" id="reg_billing_first_name" value="<?php if (!empty($_POST['billing_first_name'])) esc_attr_e($_POST['billing_first_name']); ?>" />
@@ -227,17 +227,17 @@ function wooc_extra_register_fields()
     <?php
     if ($isRefUser) { ?>
         <input type="hidden" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
-        <?php
+    <?php
     } else { ?>
         <p class="form-row form-row-last">
             <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?></label>
             <input type="number" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
         </p>
-        <?php
+    <?php
     } ?>
     <input type="hidden" class="input-text" name="billing_country" id="billing_country" value="<?php echo $country ? $country : 'SE' ?>" />
     <div class="clear"></div>
-    <?php
+<?php
 }
 
 // Validate extra fields
@@ -390,12 +390,12 @@ function woocommerce_cart_totals_after_order_total_add_pv($arg)
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
         }
     }
-    ?>
+?>
     <tr class="order-total">
         <th><?php esc_html_e('Total PV', 'woocommerce'); ?></th>
         <td data-title="<?php esc_attr_e('Total PV', 'woocommerce'); ?>"><b><?php echo $totalPV ?></b></td>
     </tr>
-    <?php
+<?php
 }
 
 function wc_card_totals_order_total_pv_html()
@@ -411,7 +411,7 @@ function wc_card_totals_order_total_pv_html()
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
         }
     }
-    ?>
+?>
     <b><?php echo $totalPV; ?></b>
     <?php
 }
@@ -445,7 +445,7 @@ function display_image()
         // $original_image_url = wp_get_attachment_url($attachment_id);
 
         // Display Image instead of URL
-        ?>
+    ?>
         <div class="image-upload">
             <label for="file-input">
                 <?php echo wp_get_attachment_image($attachment_id, $size = 'thumbnail'); ?>
@@ -453,7 +453,7 @@ function display_image()
             </label>
             <input id="file-input" type="file" name="image" accept="image/x-png,image/gif,image/jpeg">
         </div>
-        <?php
+    <?php
     }
 }
 
@@ -475,12 +475,12 @@ function action_woocommerce_edit_account_form_start()
     // Get attachment id
     $attachment_id = get_user_meta($user_id, 'image', true);
     if (!$attachment_id) {
-        ?>
+    ?>
         <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
             <label for="image"><?php esc_html_e('Profile Image', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
             <input type="file" class="woocommerce-Input" name="image" accept="image/x-png,image/gif,image/jpeg">
         </p>
-        <?php
+<?php
     }
 }
 
@@ -523,20 +523,22 @@ function action_woocommerce_save_account_details($user_id)
 }
 
 // Add enctype to form to allow image upload
+add_action('woocommerce_edit_account_form_tag', 'action_woocommerce_edit_account_form_tag');
 function action_woocommerce_edit_account_form_tag()
 {
     echo 'enctype="multipart/form-data"';
 }
-add_action('woocommerce_edit_account_form_tag', 'action_woocommerce_edit_account_form_tag');
+
 
 
 /**
- * @snippet       Function to remove coupons details from cart page
+ * @snippet       Remove coupons details from cart page (only show coupons on checkout page)
  * @author        Ratnakar Dubey <ratnakar.dubey@storeapps.org>
  * @compatible    WooCommerce 5.0
  * @source        Email from Ratnakar
  */
 
+add_action('wp_loaded', 'storeapps_handle_smart_coupons_hooks');
 function storeapps_handle_smart_coupons_hooks()
 {
     if (!class_exists('WC_SC_Display_Coupons')) {
@@ -547,4 +549,45 @@ function storeapps_handle_smart_coupons_hooks()
         remove_action('woocommerce_after_cart_table', array($wc_sc_display_coupons, 'show_available_coupons_after_cart_table'));
     }
 }
-add_action('wp_loaded', 'storeapps_handle_smart_coupons_hooks');
+
+
+/**
+ * @snippet       Add social buttons on Products Page
+ * @author        Michelle
+ * @compatible    WooCommerce 5.0
+ * @source        https://stackoverflow.com/questions/57411715/wordpress-add-social-buttons-on-products-page
+ */
+
+// add action with variabile in url to share
+add_action('woocommerce_after_add_to_cart_button', 'my_social_btn');
+function my_social_btn()
+{
+    // get current url
+
+    // ALEKSANDER, PLEASE ADD CODE, FOLLOW INSTRUCTIONS
+    // NEED TO ADD REFERAL ID IN THOSE LINKS
+    // 1. IF USER IS LOGGED IN, THEN IT SHOULD TAKE THE USERS REF ID
+    // 2. IF USER IS NOT LOGGED IN, LOOK FOR REF ID IN COOKIE
+    // 3. NOT LOGGED IN OR NO REF ID IN COOKIE, THEN DONT ADD REF ID IN URL
+
+    global $wp;
+    $current_url = home_url(add_query_arg(array(), $wp->request));
+    echo '<div class="my-custom-social">
+  <a href="https://www.facebook.com/sharer/sharer.php?u=' . $current_url . '" class="social fb"><i class="fab fa-facebook-square"></i></a>
+  <a href="https://twitter.com/intent/tweet?url=' . $current_url . '" class="social tw"><i class="fab fa-twitter-square"></i></a>
+  <a href="https://api.whatsapp.com/send?text=' . $current_url . '" target="_blank" class="social wa"><i class="fab fa-whatsapp-square"></i></a>
+</div>';
+}
+
+/**
+ * @snippet       Add FontAwesome.io Fonts as a stylesheet
+ * @author        App Shah
+ * @compatible    WooCommerce 5.0
+ * @source        https://crunchify.com/how-to-add-fontawesome-io-fonts-to-wordpress-without-any-plugin/
+ */
+
+add_action('wp_enqueue_scripts', 'crunchify_enqueue_fontawesome');
+function crunchify_enqueue_fontawesome()
+{
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/fontawesome.min.css');
+}

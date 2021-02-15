@@ -67,3 +67,14 @@ a:focus, .focus a {
     visibility: visible;
     opacity: 1;
   }
+
+.my-custom-social{
+    display:flex;
+    font-size:25px;
+    float:none;
+    margin-top:20px;
+}
+
+.my-custom-social i{
+   margin-right:10px;
+}
