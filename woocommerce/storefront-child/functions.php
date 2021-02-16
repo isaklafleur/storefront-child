@@ -576,8 +576,8 @@ function my_social_btn()
     global $wp;
     $current_url = home_url(add_query_arg(array(), $wp->request));
     echo '<div class="my-custom-social">
-  <a href="https://www.facebook.com/sharer/sharer.php?u=' . $current_url . '" class="social fb"><i class="fab fa-facebook-square"></i></a>
-  <a href="https://twitter.com/intent/tweet?url=' . $current_url . '" class="social tw"><i class="fab fa-twitter-square"></i></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=' . $current_url . '" target="_blank" class="social fb"><i class="fab fa-facebook-square"></i></a>
+  <a href="https://twitter.com/intent/tweet?url=' . $current_url . '" target="_blank" class="social tw"><i class="fab fa-twitter-square"></i></a>
   <a href="https://api.whatsapp.com/send?text=' . $current_url . '" target="_blank" class="social wa"><i class="fab fa-whatsapp-square"></i></a>
 </div>';
 }
