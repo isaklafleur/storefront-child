@@ -591,3 +591,26 @@ function crunchify_enqueue_fontawesome()
 {
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/fontawesome.min.css');
 }
+
+
+/**
+ * @snippet       “You Only Need $$$ to Get Free Shipping!” @ Cart
+ * @author        Rodolfo Melogli
+ * @compatible    WooCommerce 5.0
+ * @source        https://www.businessbloomer.com/woocommerce-add-need-spend-x-get-free-shipping-cart-page/
+ */
+
+add_action('woocommerce_before_cart', 'bbloomer_free_shipping_cart_notice');
+function bbloomer_free_shipping_cart_notice()
+{
+    $min_amount = 100; //change this to your free shipping threshold
+
+    $current = WC()->cart->subtotal;
+
+    if ($current < $min_amount) {
+        $added_text = 'Get free shipping if you order ' . wc_price($min_amount - $current) . ' more!';
+        $return_to = wc_get_page_permalink('shop');
+        $notice = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', esc_url($return_to), 'Continue Shopping', $added_text);
+        wc_print_notice($notice, 'notice');
+    }
+}
