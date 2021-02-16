@@ -176,10 +176,13 @@ function woocommerce_custom_fields_display()
                 esc_html($mlm_product_volume_value)
             );
         }
-    } else {
+    }
+    /*
+    else {
         echo "No PV, because your are not logged in as Brand Partner... :(";
         echo "<br/>";
     }
+    */
 }
 
 /**
@@ -609,6 +612,12 @@ function bbloomer_free_shipping_cart_notice()
 
     if ($current < $min_amount) {
         $added_text = 'Get free shipping if you order ' . wc_price($min_amount - $current) . ' more!';
+        $return_to = wc_get_page_permalink('shop');
+        $notice = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', esc_url($return_to), 'Continue Shopping', $added_text);
+        wc_print_notice($notice, 'notice');
+    }
+    if ($current >= $min_amount) {
+        $added_text = 'Congratulations - Your shipping is now on us and absolutely free :)';
         $return_to = wc_get_page_permalink('shop');
         $notice = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', esc_url($return_to), 'Continue Shopping', $added_text);
         wc_print_notice($notice, 'notice');

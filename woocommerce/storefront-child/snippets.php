@@ -1,5 +1,13 @@
 <?php
 
+
+/* Remove Categories from Single Products */
+remove_action(
+    'woocommerce_single_product_summary',
+    'woocommerce_template_single_meta',
+    40
+);
+
 /**
  * Show an invalid coupon as valid
  *
