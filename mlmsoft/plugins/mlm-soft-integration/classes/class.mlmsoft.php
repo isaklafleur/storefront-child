@@ -201,6 +201,11 @@ class MlmSoft
                 'billing_city' => empty($userMeta['billing_city']) ? '' : $userMeta['billing_city'][0]
             ];
             $this->updateUserProfile($user->ID, $dataToUpdate);
+
+            $this->set_user_meta($user->ID, $apiAuthResp->user->account->id);
+
+            $this->updateUserRank($user->ID);
+
             //update_user_meta($user->data->ID, 'invite_code', $openid_fields['invite_code']);
             return $user;
         }
@@ -247,6 +252,58 @@ class MlmSoft
         }
 
         return $referral;
+    }
+
+    public function get_sponsor_data($inviteCode)
+    {
+        $referral = false;
+
+        $reqRes = new MlmSoftApiResponse($this->apiClient->execGet(
+            '/api2/online-office/account/search-by-invite',
+            array(
+                "inviteCode" => $inviteCode
+            )
+        ));
+
+        if ($reqRes->isPrimarySuccess()) {
+            $data = $reqRes->getPrimaryPayload();
+            $userProfile = $data->account->users[0];
+            $userProfileData = [];
+            foreach ($userProfile->profile as $profileField) {
+                $userProfileData[$profileField->field->alias] = $profileField->value;
+            }
+            $userProfileData['account_id'] = $data->account->id;
+            $referral = $userProfileData;
+        }
+
+        return $referral;
+    }
+
+    public function get_property_values($accountId)
+    {
+        $reqRes = new MlmSoftApiResponse(($this->apiClient->execGet(
+            '/api2/online-office/account/get-property-values',
+            [
+                'accountId' => $accountId
+            ]
+        )));
+        if ($reqRes->isPrimarySuccess()) {
+            return $reqRes->getPrimaryPayload()->list;
+        }
+        return [];
+    }
+
+    public function format_property_values($properties)
+    {
+        $result = [];
+        foreach ($properties as $property) {
+            $result[$property->alias] = [
+                'title' => $property->title,
+                'value' => $property->value,
+                'id' => $property->id
+            ];
+        }
+        return $result;
     }
 
 
@@ -366,7 +423,7 @@ class MlmSoft
                 if ($fullName) {
                     ?>
                     <div style="background: #000000; opacity: 0.5; width: 100%;  color:#ffffff; position: fixed; top:0px; z-index: 5000; padding:20px;">
-                        <?php echo $fullName; ?>
+                        <a href="/profile/<?php echo $invite_code ?>"><?php echo $fullName; ?></a>
                         <span style="float:right"><a style="color:#ffffff;" href="/my-account">Sign In</a></span>
                         <span style="margin-right:10px; float:right"><a style="color:#ffffff;"
                                                                         href="/my-account?referral=<?php echo $invite_code; ?>">Register</a></span>
@@ -788,6 +845,28 @@ class MlmSoft
             ]
         ));
         return $reqRes->isPrimarySuccess();
+    }
+
+    private function updateUserRank($userId)
+    {
+        $accountId = get_user_meta($userId, 'account_id', true);
+        $rank = $this->get_user_rank($accountId);
+
+        if ($rank) {
+            update_user_meta($userId, 'mlm_brandpartner_rank', $rank);
+        }
+    }
+
+    public function get_user_rank($accountId)
+    {
+        $propertyValues = $this->get_property_values($accountId);
+        if (!empty($propertyValues)) {
+            $propertyValues = $this->format_property_values($propertyValues);
+            if (isset($propertyValues[$this->options['rank_property_alias']['value']])) {
+                return $propertyValues[$this->options['rank_property_alias']['value']]['value'];
+            }
+        }
+        return null;
     }
 
     public function woocommerce_save_account_details($wpUserId)
