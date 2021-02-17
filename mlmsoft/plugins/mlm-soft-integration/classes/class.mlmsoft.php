@@ -140,14 +140,12 @@ class MlmSoft
                 wp_set_password($password, $user->ID);
 
                 return $user;
-
             } else {
 
                 $errors = new WP_Error();
                 $errors->add('error!', 'Invalid authorization', 'error');
                 return $errors;
             }
-
         } else {
             $errors = new WP_Error();
             return $errors;
@@ -348,8 +346,6 @@ class MlmSoft
         if (!in_array('administrator', (array)$user->roles)) {
             add_filter('show_admin_bar', '__return_false');
         }
-
-
     }
 
 
@@ -421,17 +417,15 @@ class MlmSoft
                 $invite_code = $this->mlmsoft_referral('invite_code');
 
                 if ($fullName) {
-                    ?>
-                    <div style="background: #000000; opacity: 0.5; width: 100%;  color:#ffffff; position: fixed; top:0px; z-index: 5000; padding:20px;">
-                        <a href="/profile/<?php echo $invite_code ?>"><?php echo $fullName; ?></a>
+?>
+                    <div style="background: #000000; opacity: 0.5; width: 100%; color:#ffffff; position: fixed; z-index: 5000; padding:10px;">
+                        <a style="color:#ffffff;" href="/profile/<?php echo $invite_code ?>">You are shopping with <?php echo $fullName; ?></a>
                         <span style="float:right"><a style="color:#ffffff;" href="/my-account">Sign In</a></span>
-                        <span style="margin-right:10px; float:right"><a style="color:#ffffff;"
-                                                                        href="/my-account?referral=<?php echo $invite_code; ?>">Register</a></span>
+                        <span style="margin-right:10px; float:right"><a style="color:#ffffff;" href="/my-account/?referral=<?php echo $invite_code . '&showbanner'; ?>">Register</a></span>
                     </div>
-                    <?php
+                <?php
                 }
             }
-
         } else {
 
             if ($this->options['automatic_authorized_user_header']['value']) {
@@ -439,15 +433,12 @@ class MlmSoft
                 ?>
                 <div style="background: #000000; opacity: 0.5; width: 100%;  color:#ffffff; position: fixed; top:0px; z-index: 50; padding:20px;">
                     <?php echo $user->data->display_name; ?>
-                    <span style="float:right"><a style="color:#ffffff;"
-                                                 href="/wp-login.php?action=logout">Logout</a></span>
-                    <span style="margin-right:10px; float:right"><a style="color:#ffffff;"
-                                                                    href="<?php echo $this->options['online_office_url']['value']; ?>">Online office</a></span>
+                    <span style="float:right"><a style="color:#ffffff;" href="/wp-login.php?action=logout">Logout</a></span>
+                    <span style="margin-right:10px; float:right"><a style="color:#ffffff;" href="<?php echo $this->options['online_office_url']['value']; ?>">Online office</a></span>
                 </div>
                 <?php
             }
         }
-
     }
 
 
@@ -466,15 +457,12 @@ class MlmSoft
                 $email = $this->mlmsoft_referral('email');
 
                 if ($fullName) {
-                    ?>
+                ?>
                     <div style="background: #000000; opacity: 0.5; width: 100%;  color:#ffffff; position: fixed; bottom:0px; z-index: 50; padding:20px;">
                         Hi! I'm <?php echo $fullName; ?>, your shopping consultant. I'm happy to help, you can reach me
-                        by: <a style="text-decoration:underline; color:#ffffff; font-weight:bold; "
-                               href=""><?php echo $phone; ?></a> or <a
-                                style="text-decoration:underline; color:#ffffff; font-weight:bold;"
-                                href="mailto:<?php echo $email; ?>"><?php echo $email; ?></a>
+                        by: <a style="text-decoration:underline; color:#ffffff; font-weight:bold; " href=""><?php echo $phone; ?></a> or <a style="text-decoration:underline; color:#ffffff; font-weight:bold;" href="mailto:<?php echo $email; ?>"><?php echo $email; ?></a>
                     </div>
-                    <?php
+            <?php
                 }
             }
         }
@@ -530,15 +518,14 @@ class MlmSoft
         if ($refId) {
             ?>
             <input type="hidden" id="mlmsoftsponsorid" name="mlmsoftsponsorid" value="<?php echo $refId; ?>">
-            <?php
+        <?php
         } else {
-            ?>
+        ?>
             <div>
                 <label for="mlmsoftsponsorid"><?php _e('Sponsor ID', 'mlmsoft'); ?></label>
-                <input id="mlmsoftsponsorid" name="mlmsoftsponsorid" type="text" class="input pmpro_required" size="30"
-                       value="<?php echo isset($_REQUEST['mlmsoftsponsorid']) ? esc_attr($_REQUEST['mlmsoftsponsorid']) : '' ?>"/>
+                <input id="mlmsoftsponsorid" name="mlmsoftsponsorid" type="text" class="input pmpro_required" size="30" value="<?php echo isset($_REQUEST['mlmsoftsponsorid']) ? esc_attr($_REQUEST['mlmsoftsponsorid']) : '' ?>" />
             </div>
-            <?php
+        <?php
         } ?>
         <script>
             jQuery('#username').parent().remove();
@@ -689,7 +676,6 @@ class MlmSoft
             '/api2/online-office/account/volume-change',
             $params
         );
-
     }
 
     private function getSkuRankValues()
@@ -717,11 +703,11 @@ class MlmSoft
     {
         $refId = $this->mlmsoft_referral('id');
         if ($refId) {
-            ?>
+        ?>
             <script>
                 jQuery('#mlmsoftsponsorid_field').hide();
             </script>
-            <?php
+<?php
         }
     }
 
