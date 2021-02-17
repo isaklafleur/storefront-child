@@ -487,6 +487,34 @@ function action_woocommerce_edit_account_form_start()
     }
 }
 
+add_action('woocommerce_edit_account_form_start', 'woocommerce_add_about_me_information');
+function woocommerce_add_about_me_information()
+{
+    $user = wp_get_current_user();
+    if (in_array('brandpartner', $user->roles) || in_array('affiliate', $user->roles)) {
+        ?>
+        <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+            <label for="about_me"><?php esc_html_e('About me', 'woocommerce'); ?></label>
+            <textarea class="woocommerce-Input" name="about_me" style="resize: vertical" id="about_me"><?php
+                $aboutMe = get_user_meta($user->ID, 'description', true);
+                if (isset($_POST['about_me'])) {
+                    $aboutMe = $_POST['about_me'];
+                }
+                echo $aboutMe;
+                ?></textarea>
+        </p>
+        <?php
+    }
+}
+
+add_action('woocommerce_save_account_details', 'my_account_saving_about_me', 20, 1);
+function my_account_saving_about_me($user_id)
+{
+    if (isset($_POST['about_me']) && !empty($_POST['about_me'])) {
+        update_user_meta($user_id, 'description', esc_html($_POST['about_me']));
+    }
+}
+
 // Validate image upload field (Priority should be maximum)
 add_action('woocommerce_save_account_details_errors', 'action_woocommerce_save_account_details_errors', 1000, 1);
 function action_woocommerce_save_account_details_errors($args)
@@ -622,4 +650,11 @@ function bbloomer_free_shipping_cart_notice()
         $notice = sprintf('<a href="%s" class="button wc-forward">%s</a> %s', esc_url($return_to), 'Continue Shopping', $added_text);
         wc_print_notice($notice, 'notice');
     }
+}
+
+add_action('init', 'rewrite_rule_my', 10, 1);
+function rewrite_rule_my()
+{
+    add_rewrite_tag('%referral_code%', '([^&]+)');
+    add_rewrite_rule('profile/([^/]*)?', 'index.php?pagename=profile&referral_code=$matches[1]', 'top');
 }

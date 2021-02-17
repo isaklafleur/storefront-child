@@ -9,6 +9,10 @@
  * @version     1.0.0
  */
 
+/**
+ * @var $MlmSoft MlmSoft
+ */
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
@@ -26,53 +30,58 @@ get_header('shop'); ?>
 // So we can look it up and get the data from Wordpress instead of MLMSoft.
 // like lbrtybeauty.com/profile/[refidfromsponsor]
 // script should find the sponsor based on this [refidfromsponsor] and display user data from sponsor
-$userBySponsorId = get_user_by('id', 1);
+$inviteCode = get_query_var('referral_code');
 
-/*
-$user_id = 1;
-$all_meta_for_user = array_map(function ($a) {
-    return $a[0];
-}, get_user_meta($user_id));
-print_r($all_meta_for_user);
-*/
-
-/*
-$user_id = 1;
-$key = 'last_name';
-$single = true;
-$user_last = get_user_meta($user_id, $key, $single);
-echo '<p>The ' . $key . ' value for user id ' . $user_id . ' is: ' . $user_last . '</p>';
-*/
-
-// Find user role of user and display name of user role.
-$current_role = $userBySponsorId->roles[0];
-$all_roles = $wp_roles->roles;
-foreach ($all_roles as $role_key => $role_details) {
-    if ($role_key == $current_role) $current_role_name = $role_details['name'];
+$sponsorUser = get_users(array('meta_key' => 'invite_code', 'meta_value' => $inviteCode));
+$sponsorData = [];
+if (count($sponsorUser) == 0) {
+    $sponsorData = $MlmSoft->get_sponsor_data($inviteCode);
+    if (!empty($sponsorData)) {
+        $sponsorData['rank'] = $MlmSoft->get_user_rank($sponsorData['account_id']);
+    }
+} else {
+    /** @var WP_User $sponsorUser */
+    $sponsorUser = $sponsorUser[0];
+    $sponsorData = [
+        'firstname' => $sponsorUser->first_name,
+        'lastname' => $sponsorUser->last_name,
+        'email' => $sponsorUser->user_email,
+        'phone' => get_user_meta($sponsorUser->ID, 'phone', true),
+        'user_url' => $sponsorUser->user_url,
+        'about_me' => get_user_meta($sponsorUser->ID, 'description', true),
+        'rank' => get_user_meta($sponsorUser->ID, 'mlm_brandpartner_rank', true)
+    ];
 }
 
-// Print out details of sponsor based on the [refidfromsponsor]
-echo $userBySponsorId->first_name . ' ' . $userBySponsorId->last_name . ' is an ' . $current_role_name . '. He lives in ' . $userBySponsorId->billing_city . ' in ' . WC()->countries->countries[$userBySponsorId->billing_country];
+if (!empty($sponsorData)) {
 
+    echo '<div style="text-align: center">Sponsor Info</div>';
+    echo '<p>First name: ' . $sponsorData['firstname'] . '</p>';
+    echo '<p>Last name: ' . $sponsorData['lastname'] . '</p>';
+    echo '<p>Email: ' . $sponsorData['email'] . '</p>';
+    echo '<p>Phone: ' . $sponsorData['phone'] . '</p>';
+    echo '<p>User url: ' . $sponsorData['user_url'] . '</p>';
+    echo '<p>About me: ' . $sponsorData['about_me'] . '</p>';
+    echo '<p>Rank: ' . $sponsorData['rank'] . '</p>';
 // This function uses currently the current users ID, need to change to use id of userBySponsorId.
 // Get current user id
-$user_id = get_current_user_id();
+    $user_id = get_current_user_id();
 
 // Get attachment id
-$attachment_id = get_user_meta($user_id, 'image', true);
+    $attachment_id = get_user_meta($user_id, 'image', true);
 // True
-if ($attachment_id) {
-    // $original_image_url = wp_get_attachment_url($attachment_id);
+    if ($attachment_id) {
+        // $original_image_url = wp_get_attachment_url($attachment_id);
 
-    // Display Image instead of URL
-?>
-    <?php echo wp_get_attachment_image($attachment_id, $size = 'thumbnail'); ?>
+        // Display Image instead of URL
+        ?>
+        <?php echo wp_get_attachment_image($attachment_id, $size = 'thumbnail'); ?>
 
-<?php
+        <?php
+    }
+} else {
+    echo 'User not found';
 }
-?>
-
-<?php
 /**
  * woocommerce_before_main_content hook.
  *
