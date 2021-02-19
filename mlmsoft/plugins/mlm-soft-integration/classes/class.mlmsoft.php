@@ -418,11 +418,24 @@ class MlmSoft
 
                 if ($fullName) {
 ?>
-                    <div style="background: #000000; opacity: 0.5; width: 100%; color:#ffffff; position: fixed; z-index: 5000; padding:10px;">
-                        <a style="color:#ffffff;" href="/profile/<?php echo $invite_code ?>">You are shopping with <?php echo $fullName; ?></a>
-                        <span style="float:right"><a style="color:#ffffff;" href="/my-account">Sign In</a></span>
-                        <span style="margin-right:10px; float:right"><a style="color:#ffffff;" href="/my-account/?referral=<?php echo $invite_code . '&showbanner'; ?>">Register</a></span>
+                    <script>
+                        function myFunction() {
+                            var x = document.getElementById("referralbanner");
+                            if (x.style.display === "none") {
+                                x.style.display = "block";
+                            } else {
+                                x.style.display = "none";
+                            }
+                        }
+                    </script>
+                    <div id="referralbanner" style="background: #000000;">
+                        <a href="/profile/<?php echo $invite_code ?>">You are shopping with <?php echo $fullName; ?></a>
+                        <span style="margin-right:10px; float:right" onclick="myFunction()"><a href="#">Hide</a></span>
+
+
                     </div>
+
+
                 <?php
                 }
             }

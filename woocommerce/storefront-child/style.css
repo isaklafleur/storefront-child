@@ -76,3 +76,15 @@ a:focus, .focus a {
 .woocommerce-tabs {
   padding-top: 0.5em;
 }
+
+#referralbanner {
+  background: #000000;
+  /* opacity: 0.5; */
+  width: 100%;
+  color:#ffffff;
+  z-index: 5000;
+  padding:10px;
+  height: 40px;
+  vertical-align: middle;
+  /* position: fixed; */
+}
