@@ -291,6 +291,26 @@ class MlmSoft
         return [];
     }
 
+    public function addWalletOperation($userId, $amount, $walletTypeId, $walletOperationTypeId, $comment = '')
+    {
+        $account_id = get_user_meta($userId, 'account_id', true);
+
+        $params = array(
+            'accountId' => $account_id,
+            'amount' => $amount,
+            'walletTypeId' => $walletTypeId,
+            'walletOperationTypeId' => $walletOperationTypeId,
+            'comment' => $comment
+        );
+
+
+        $response = new MlmSoftApiResponse($this->apiClient->execPost(
+            '/api2/online-office/wallet/add-operation',
+            $params
+        ));
+        return $response->isPrimarySuccess();
+    }
+
     public function format_property_values($properties)
     {
         $result = [];
