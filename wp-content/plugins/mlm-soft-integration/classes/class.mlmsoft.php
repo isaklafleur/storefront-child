@@ -38,8 +38,8 @@ class MlmSoft
 
         if (!isset($_REQUEST["standard_login"]) && !isset($_COOKIE["standard_login"])) {
             //error_log('standard_login: N');
-            remove_filter('authenticate', 'wp_authenticate_username_password', 20, 3);
-            remove_filter('authenticate', 'wp_authenticate_email_password', 20, 3);
+            remove_filter('authenticate', 'wp_authenticate_username_password', 20);
+            remove_filter('authenticate', 'wp_authenticate_email_password', 20);
             remove_filter('authenticate', 'wp_authenticate_spam_check', 99);
             add_filter('authenticate', array($this, 'auth'), 10, 3);
         } else {
@@ -138,7 +138,12 @@ class MlmSoft
 
                 $user = $this->set_current_user($reqRes->getPrimaryPayload()->auth);
                 wp_set_password($password, $user->ID);
-
+                $error = apply_filters('mlmsoft_auth_success', $user, $password);
+                if ($error instanceof WP_Error) {
+                    foreach ($error->errors as $error) {
+                        wc_add_notice($error, 'error');
+                    }
+                }
                 return $user;
             } else {
 
@@ -203,6 +208,7 @@ class MlmSoft
             $this->set_user_meta($user->ID, $apiAuthResp->user->account->id);
 
             $this->updateUserRank($user->ID);
+            $this->update_user_status($user->ID);
 
             //update_user_meta($user->data->ID, 'invite_code', $openid_fields['invite_code']);
             return $user;
@@ -223,6 +229,22 @@ class MlmSoft
             if (!empty($invite_code)) {
                 update_user_meta($user_id, 'invite_code', $invite_code);
             }
+        }
+    }
+
+    protected function set_user_status($userId, $status)
+    {
+        $roles = (new WP_Roles())->roles;
+        $roleKey = '';
+        foreach ($roles as $key => $role) {
+            if (mb_strtolower($role['name']) == mb_strtolower($status)) {
+                $roleKey = $key;
+                break;
+            }
+        }
+        if (!empty($roleKey)) {
+            $user = new WP_User($userId);
+            $user->set_role($roleKey);
         }
     }
 
@@ -318,7 +340,7 @@ class MlmSoft
             $result[$property->alias] = [
                 'title' => $property->title,
                 'value' => $property->value,
-                'id' => $property->id
+                'id' => isset($property->id) ? $property->id : null
             ];
         }
         return $result;
@@ -709,6 +731,8 @@ class MlmSoft
             '/api2/online-office/account/volume-change',
             $params
         );
+
+        $this->update_user_status($userId);
     }
 
     private function getSkuRankValues()
@@ -813,7 +837,6 @@ class MlmSoft
                 "type" => 'member',
                 "password" => $new_user_array['user_pass'],
                 "sponsorId" => sanitize_text_field(stripslashes($_REQUEST['mlmsoftsponsorid'])),
-                "confirmationUrl" => $this->options['online_office_url']['value'] . '?code_confirm={{code}}',
                 "profile" => array(
                     "firstname" => sanitize_text_field(stripslashes($_REQUEST['billing_first_name'])),
                     "lastname" => sanitize_text_field(stripslashes($_REQUEST['billing_last_name'])),
@@ -886,6 +909,16 @@ class MlmSoft
             }
         }
         return null;
+    }
+
+    public function update_user_status($userId)
+    {
+        $accountId = get_user_meta($userId, 'account_id', true);
+        $propertyValues = $this->get_property_values($accountId);
+        if (!empty($propertyValues)) {
+            $propertyValues = $this->format_property_values($propertyValues);
+            $this->set_user_status($userId, $propertyValues['Status']['value']);
+        }
     }
 
     public function woocommerce_save_account_details($wpUserId)

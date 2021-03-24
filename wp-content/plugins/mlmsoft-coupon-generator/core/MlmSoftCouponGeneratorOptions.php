@@ -119,7 +119,10 @@ class MlmSoftCouponGeneratorOptions
 
             if (is_array($this->options[$key])) {
 
+                // register options into DB
                 register_setting('coupon_generator_options', $option['id'], '');
+
+                //add a particual field #1
 
                 add_settings_field(
                     $option['id'],

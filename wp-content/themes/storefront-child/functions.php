@@ -199,13 +199,20 @@ function wooc_extra_register_fields()
     $location = WC_Geolocation::geolocate_ip();
     $country = $location['country']; // example "SE"
     $isRefUser = isset($_SESSION['referral_data']) && !empty($_SESSION['referral_data']) && !empty($_SESSION['referral_data']['id']);
-    $sponsorId = '';
+    $sponsorInviteCode = '';
     if ($isRefUser) {
-        $sponsorId = $_SESSION['referral_data']['id'];
-    } elseif (!empty($_POST['mlmsoftsponsorid'])) {
-        $sponsorId = $_POST['mlmsoftsponsorid'];
+        $sponsorInviteCode = $_SESSION['referral_data']['invite_code'];
+    } elseif (!empty($_POST['sponsor_invite_code'])) {
+        $sponsorInviteCode = $_POST['sponsor_invite_code'];
     }
     $rowClass = $isRefUser ? 'form-row-wide' : 'form-row-first';
+    global $customEnrollmentProcess;
+    $step1 = $customEnrollmentProcess->getStepPayload(1);
+    $userRole = '';
+    if (isset($step1['type'])) {
+        $userRole = $step1['type'] == 'Affiliate' ? 'affiliate' : 'brandpartner';
+        $_POST['role'] = $userRole;
+    }
 ?>
     <p class="form-row form-row-first">
         <label for="reg_billing_first_name"><?php _e('First name', 'woocommerce'); ?><span class="required">*</span></label>
@@ -219,22 +226,22 @@ function wooc_extra_register_fields()
         <label for="reg_billing_phone"><?php _e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="tel" class="input-text" name="billing_phone" id="reg_billing_phone" pattern="\+\d{5,}" value="<?php if (!empty($_POST['billing_phone'])) esc_attr_e($_POST['billing_phone']); ?>" />
     </p>
-    <p class="form-row <?php echo $rowClass ?>">
-        <label for="reg_role"><?php _e('Customer, Affiliate or Brand Partner?', 'woocommerce'); ?><span class="required">*</span></label>
-        <select class="input-text" name="role" id="reg_role">
-            <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'customer') esc_attr_e('selected'); ?> value="customer">Customer</option>
-            <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'affiliate') esc_attr_e('selected'); ?> value="affiliate">Affiliate</option>
-            <option <?php if (!empty($_POST['role']) && $_POST['role'] == 'brandpartner') esc_attr_e('selected'); ?> value="brandpartner">Brand Partner</option>
+<!--    <p class="form-row <?php /*echo $rowClass */?>">
+        <label for="reg_role"><?php /*_e('Customer, Affiliate or Brand Partner?', 'woocommerce'); */?><span class="required">*</span></label>
+        <select class="input-text" name="role" id="reg_role" <?php /*if (!empty($userRole)) echo 'disabled' */?>>
+            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'customer') esc_attr_e('selected'); */?> value="customer">Customer</option>
+            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'affiliate') esc_attr_e('selected'); */?> value="affiliate">Affiliate</option>
+            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'brandpartner') esc_attr_e('selected'); */?> value="brandpartner">Brand Partner</option>
         </select>
-    </p>
+    </p>-->
     <?php
     if ($isRefUser) { ?>
-        <input type="hidden" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
+        <input type="hidden" class="input-text" name="sponsor_invite_code" id="reg_sponsorID" value="<?php echo $sponsorInviteCode ?>" />
     <?php
     } else { ?>
-        <p class="form-row form-row-last">
-            <label for="reg_sponsorID"><?php _e('Sponsor ID (the ID of the person who referred you)', 'woocommerce'); ?></label>
-            <input type="number" class="input-text" name="mlmsoftsponsorid" id="reg_sponsorID" value="<?php echo $sponsorId ?>" />
+        <p class="form-row form-row-wide">
+            <label for="reg_sponsorInviteCode"><?php _e('Sponsor invite code (the invite code of the person who referred you)', 'woocommerce'); ?></label>
+            <input type="text" class="input-text" name="sponsor_invite_code" id="reg_sponsorInviteCode" value="<?php echo $sponsorInviteCode ?>" />
         </p>
     <?php
     } ?>
@@ -259,8 +266,25 @@ function wooc_validate_extra_register_fields($username, $email, $validation_erro
     if (isset($_POST['role']) && empty($_POST['role'])) {
         $validation_errors->add('role_error', __('Role is required.', 'woocommerce'));
     }
-    if (isset($_POST['mlmsoftsponsorid']) && empty($_POST['mlmsoftsponsorid'])) {
-        $_REQUEST['mlmsoftsponsorid'] = '1';
+    if (isset($_POST['sponsor_invite_code'])) {
+        $sponsorId = '';
+        if (empty($_POST['sponsor_invite_code'])) {
+            $sponsorId = '1';
+        } else {
+            global $MlmSoft;
+            $sponsorUser = get_users(array('meta_key' => 'invite_code', 'meta_value' => $_POST['sponsor_invite_code']));
+            if (count($sponsorUser) == 0) {
+                $sponsorData = $MlmSoft->get_sponsor_data($_POST['sponsor_invite_code']);
+                if (!empty($sponsorData)) {
+                    $sponsorId = $sponsorData['account_id'];
+                }
+            } else {
+                /** @var WP_User $sponsorUser */
+                $sponsorUser = $sponsorUser[0];
+                $sponsorId = get_user_meta($sponsorUser->ID, 'account_id', true);
+            }
+        }
+        $_REQUEST['mlmsoftsponsorid'] = $sponsorId;
     }
     return $validation_errors;
 }
@@ -291,13 +315,16 @@ function wooc_save_extra_register_fields($customer_id)
         update_user_meta($customer_id, 'billing_phone', sanitize_text_field($_POST['billing_phone']));
     }
     if (isset($_POST['role'])) {
-        if ($_POST['role'] == 'affiliate') {
-            $user = new WP_User($customer_id);
-            $user->set_role('affiliate');
-        }
-        if ($_POST['role'] == 'brandpartner') {
-            $user = new WP_User($customer_id);
-            $user->set_role('brandpartner');
+        global $customEnrollmentProcess;
+        if (!$customEnrollmentProcess->getStepPayload(1)['type']) {
+            if ($_POST['role'] == 'affiliate') {
+                $user = new WP_User($customer_id);
+                $user->set_role('affiliate');
+            }
+            if ($_POST['role'] == 'brandpartner') {
+                $user = new WP_User($customer_id);
+                $user->set_role('brandpartner');
+            }
         }
     }
     if (isset($_POST['sponsorID'])) {
@@ -572,13 +599,13 @@ function action_woocommerce_edit_account_form_tag()
 add_action('wp_loaded', 'storeapps_handle_smart_coupons_hooks');
 function storeapps_handle_smart_coupons_hooks()
 {
-    if (!class_exists('WC_SC_Display_Coupons')) {
+    /*if (!class_exists('WC_SC_Display_Coupons')) {
         include_once trailingslashit(WP_PLUGIN_DIR . '/' . WC_SC_PLUGIN_DIRNAME) . 'includes/class-wc-sc-display-coupons.php';
     }
     $wc_sc_display_coupons = WC_SC_Display_Coupons::get_instance();
     if (has_action('woocommerce_after_cart_table', array($wc_sc_display_coupons, 'show_available_coupons_after_cart_table'))) {
         remove_action('woocommerce_after_cart_table', array($wc_sc_display_coupons, 'show_available_coupons_after_cart_table'));
-    }
+    }*/
 }
 
 
@@ -652,9 +679,116 @@ function bbloomer_free_shipping_cart_notice()
     }
 }
 
-add_action('init', 'rewrite_rule_my', 10, 1);
-function rewrite_rule_my()
+add_action('init', 'profile_rewrite_rule', 10, 1);
+function profile_rewrite_rule()
 {
     add_rewrite_tag('%referral_code%', '([^&]+)');
     add_rewrite_rule('profile/([^/]*)?', 'index.php?pagename=profile&referral_code=$matches[1]', 'top');
+}
+
+add_filter('wc_sc_show_as_valid', 'check_valid_coupons', 10, 2);
+function check_valid_coupons($isValid, $coupon) {
+    /** @var WC_Coupon $coupon */
+    $coupon = $coupon['coupon_obj'];
+    /** @var WC_DateTime $expiryDate */
+    $expiryDate = $coupon->get_date_expires();
+    if ($expiryDate) {
+        $currentDate = new WC_DateTime();
+        /** @var DateInterval $dateDiff */
+        $dateDiff = $currentDate->diff($expiryDate);
+
+        $seconds = $dateDiff->days * 86400 + $dateDiff->h * 3600 + $dateDiff->i * 60 + $dateDiff->s;
+        $dateDiff = $dateDiff->invert == 1 ? -$seconds : $seconds;
+    } else {
+        $dateDiff = 1;
+    }
+
+    if (!empty($coupon->get_email_restrictions()) && $coupon->get_amount() > 0 && $dateDiff > 0)
+    {
+        return true;
+    }
+    return $isValid;
+}
+
+add_filter('custom_enrollment_process_template_page', 'setCustomEnrollmentPageTemplate', 10, 2);
+function setCustomEnrollmentPageTemplate($template, $stepNum) {
+    $path = get_theme_file_path('custom-enrollment-process/page-templates') . "/enrollment-page-$stepNum.php";
+    if (file_exists($path)) {
+        return $path;
+    }
+    return $template;
+}
+
+add_filter('custom_enrollment_upgrade_template_page', 'setUpgradePage', 10, 1);
+function setUpgradePage($template) {
+    $path = get_theme_file_path('custom-enrollment-process/page-templates') . "/upgrade-page.php";
+    if (file_exists($path)) {
+        return $path;
+    }
+    return $template;
+}
+
+add_filter('woocommerce_account_menu_items', 'set_profile_menus', 10, 1);
+function set_profile_menus($items) {
+    $items = insert_after($items, 'my-profile', 'Profile', 'dashboard');
+    $items = insert_after($items, 'referral-links', 'Referral links', 'my-profile');
+    return $items;
+}
+
+function insert_after($var, $key, $value, $after){
+    $new_object = array();
+    foreach((array) $var as $k => $v){
+        $new_object[$k] = $v;
+        if ($after == $k){
+            $new_object[$key] = $value;
+        }
+    }
+    return $new_object;
+}
+
+add_action('init', 'add_account_profile_links', 10);
+function add_account_profile_links() {
+    add_rewrite_endpoint('referral-links', EP_PAGES);
+    add_rewrite_endpoint('my-profile', EP_PAGES);
+}
+
+add_action('woocommerce_account_referral-links_endpoint', 'account_referral_links_page', 10);
+function account_referral_links_page() {
+    $siteUrl = get_site_url();
+    $inviteCode = get_user_meta(get_current_user_id(), 'invite_code', true);
+    $withBanner = "$siteUrl/?referral=$inviteCode&showbanner";
+    $withoutBanner = "$siteUrl/?referral=$inviteCode";
+    ?>
+    <h2>Referral links</h2>
+    <p> <label for="ref-link-with-banner" style="margin-right: 10px">Link with banner</label><input id="ref-link-with-banner" value="<?php echo $withBanner ?>" style="border-bottom: 1px solid black; min-width: 300px"></p>
+    <p> <label for="ref-link-with-banner" style="margin-right: 10px">Link without banner</label><input id="ref-link-with-banner" value="<?php echo $withoutBanner ?>" style="border-bottom: 1px solid black; min-width: 300px"></p>
+<?php
+}
+
+add_action('woocommerce_account_my-profile_endpoint', 'account_profile_page', 10);
+function account_profile_page() {
+    global $MlmSoft;
+    /** @var WP_User $user */
+    $user = wp_get_current_user();
+    $properties = $MlmSoft->get_property_values(get_user_meta($user->ID, 'account_id', true));
+    $properties = $MlmSoft->format_property_values($properties);
+    $displayProperties = [
+        'PV' => $properties['PV'],
+        'Status' => $properties['Status']
+    ];
+    ?>
+    <h2>Profile</h2>
+    <?php foreach ($displayProperties as $alias => $property) {
+        $value = $property['value'];
+        $title = $property['title'];
+        echo "<p>$title ($alias): $value</p>";
+     }
+}
+
+add_filter('render_block', 'my_render_block', 10, 2);
+function my_render_block($block_content, $parsed_block) {
+    if ($parsed_block['blockName'] == 'woocommerce/cart') {
+        $a = $block_content;
+    }
+    return $block_content;
 }

@@ -1,23 +1,26 @@
 <?php
 /*
  * Plugin Name: MLMSoft coupon generator
+ * @var $mlmSoftCouponGenerator
  */
 
 require_once(plugin_dir_path(__FILE__) . '/core/MlmSoftCouponGeneratorOptions.php');
 require_once(plugin_dir_path(__FILE__) . '/core/MlmSoftCouponGenerator.php');
 
-add_action('admin_post_generate', 'coupon_generator_generate_func'); // If the user is logged in
-function coupon_generator_generate_func()
+$mlmSoftCouponGenerator = new MlmSoftCouponGeneratorOptions();
+
+add_action('admin_post_generate', '_handle_form_action'); // If the user is logged in
+function _handle_form_action()
 {
     $pluginPrefix = MlmSoftCouponGeneratorOptions::PLUGIN_PREFIX;
-    $mlmSoftCouponGeneratorOptions = new MlmSoftCouponGeneratorOptions();
+    $mlmSoftCouponGenerator = new MlmSoftCouponGeneratorOptions();
     $mlmSoft = new MlmSoft();
     if (!empty($_POST[$pluginPrefix . 'users_for_generation'])
         && !empty($_POST[$pluginPrefix . 'amount_to_give'])
         &&!empty($_POST[$pluginPrefix . 'amount_to_deduct']))
     {
-        $walletTypeId = $mlmSoftCouponGeneratorOptions->options['wallet_type_id']['value'];
-        $operationTypeId = $mlmSoftCouponGeneratorOptions->options['operation_type_id']['value'];
+        $walletTypeId = $mlmSoftCouponGenerator->options['wallet_type_id']['value'];
+        $operationTypeId = $mlmSoftCouponGenerator->options['operation_type_id']['value'];
         $amountToGive = (float)$_POST[$pluginPrefix . 'amount_to_give'];
         $amountToDeduct = -(float)$_POST[$pluginPrefix . 'amount_to_deduct'];
         $userEmails = $_POST[$pluginPrefix . 'users_for_generation'];
@@ -38,4 +41,5 @@ function coupon_generator_generate_func()
         }
     }
     wp_redirect('/wp-admin/admin.php?page=mlmsoft_coupon_generator_settings');
+    //wc_add_notice('awdawfaw');
 }
