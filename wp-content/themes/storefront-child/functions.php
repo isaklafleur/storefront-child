@@ -759,9 +759,37 @@ function account_referral_links_page() {
     $withBanner = "$siteUrl/?referral=$inviteCode&showbanner";
     $withoutBanner = "$siteUrl/?referral=$inviteCode";
     ?>
+    <style>
+        .ref-link label {
+            margin-right: 10px;
+            width: 140px;
+            display: inline-block;
+        }
+        .ref-link input {
+            border-bottom: 1px solid black;
+            width: 300px;
+        }
+        .ref-link button {
+            margin-left: 10px;
+        }
+    </style>
     <h2>Referral links</h2>
-    <p> <label for="ref-link-with-banner" style="margin-right: 10px">Link with banner</label><input id="ref-link-with-banner" value="<?php echo $withBanner ?>" style="border-bottom: 1px solid black; min-width: 300px"></p>
-    <p> <label for="ref-link-with-banner" style="margin-right: 10px">Link without banner</label><input id="ref-link-with-banner" value="<?php echo $withoutBanner ?>" style="border-bottom: 1px solid black; min-width: 300px"></p>
+    <p class="ref-link"> <label for="ref-link-with-banner">Link with banner</label><input id="ref-link-with-banner" value="<?php echo $withBanner ?>"><button onclick="copyRefLink(true)">copy</button></p>
+    <p class="ref-link"> <label for="ref-link-without-banner">Link without banner</label><input id="ref-link-without-banner" value="<?php echo $withoutBanner ?>"><button onclick="copyRefLink(false)">copy</button></p>
+    <script>
+        function copyRefLink(withBanner)
+        {
+            let id;
+            if (withBanner) {
+                id = 'ref-link-with-banner';
+            } else  {
+                id = 'ref-link-without-banner';
+            }
+            let input = document.querySelector('#' + id);
+            input.select();
+            document.execCommand("copy");
+        }
+    </script>
 <?php
 }
 
