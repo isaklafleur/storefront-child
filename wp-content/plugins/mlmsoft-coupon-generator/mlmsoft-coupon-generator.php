@@ -7,20 +7,19 @@
 require_once(plugin_dir_path(__FILE__) . '/core/MlmSoftCouponGeneratorOptions.php');
 require_once(plugin_dir_path(__FILE__) . '/core/MlmSoftCouponGenerator.php');
 
-$mlmSoftCouponGenerator = new MlmSoftCouponGeneratorOptions();
-
+add_action('plugins_loaded', array('MlmSoftCouponGenerator', 'getInstance'));
 add_action('admin_post_generate', '_handle_form_action'); // If the user is logged in
 function _handle_form_action()
 {
     $pluginPrefix = MlmSoftCouponGeneratorOptions::PLUGIN_PREFIX;
-    $mlmSoftCouponGenerator = new MlmSoftCouponGeneratorOptions();
+    $mlmSoftCouponGenerator = MlmSoftCouponGenerator::getInstance();
     $mlmSoft = new MlmSoft();
     if (!empty($_POST[$pluginPrefix . 'users_for_generation'])
         && !empty($_POST[$pluginPrefix . 'amount_to_give'])
         &&!empty($_POST[$pluginPrefix . 'amount_to_deduct']))
     {
-        $walletTypeId = $mlmSoftCouponGenerator->options['wallet_type_id']['value'];
-        $operationTypeId = $mlmSoftCouponGenerator->options['operation_type_id']['value'];
+        $walletTypeId = $mlmSoftCouponGenerator->options->get_option_value('wallet_type_id', 0);
+        $operationTypeId = $mlmSoftCouponGenerator->options->get_option_value('operation_type_id', 0);
         $amountToGive = (float)$_POST[$pluginPrefix . 'amount_to_give'];
         $amountToDeduct = -(float)$_POST[$pluginPrefix . 'amount_to_deduct'];
         $userEmails = $_POST[$pluginPrefix . 'users_for_generation'];
@@ -28,15 +27,14 @@ function _handle_form_action()
         foreach ($userEmails as $key => $userEmail) {
             $userEmails[$key] = trim($userEmail);
         }
-        $couponGenerator = new MlmSoftCouponGenerator();
         foreach ($userEmails as $userEmail) {
-            $user = get_user_by_email($userEmail);
+            $user = get_user_by('email', $userEmail);
             if (!$user) {
                 continue;
             }
             $walletOperationResult = $mlmSoft->addWalletOperation($user->ID, $amountToDeduct, $walletTypeId, $operationTypeId, 'Sachet sample');
             if ($walletOperationResult) {
-                $couponGenerator->generateCoupon($user->user_email, $amountToGive, 10);
+                $mlmSoftCouponGenerator->generateCoupon($user->user_email, $amountToGive, 10);
             }
         }
     }

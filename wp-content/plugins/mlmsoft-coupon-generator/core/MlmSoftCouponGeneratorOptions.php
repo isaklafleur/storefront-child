@@ -19,6 +19,15 @@ class MlmSoftCouponGeneratorOptions
         $this->init();
     }
 
+    public function get_option_value($key, $default = null)
+    {
+        if (isset($this->options[$key]) && !empty($this->options[$key]['value'])) {
+            return $this->options[$key]['value'];
+        } else {
+            return $default;
+        }
+    }
+
 
     /**
      * Get Wp options from Custom Settings page
