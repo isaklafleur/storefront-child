@@ -414,7 +414,7 @@ function woocommerce_cart_totals_after_order_total_add_pv($arg)
     }
     $totalPV = 0;
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-        $_product   = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
+        $_product = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
         if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_cart_item_visible', true, $cart_item, $cart_item_key)) {
             $pv = $_product->get_meta('mlm_product_volume');
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
@@ -435,7 +435,7 @@ function wc_card_totals_order_total_pv_html()
     }
     $totalPV = 0;
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-        $_product   = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
+        $_product = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
         if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_cart_item_visible', true, $cart_item, $cart_item_key)) {
             $pv = $_product->get_meta('mlm_product_volume');
             $totalPV += ($pv ? $pv * $cart_item['quantity'] : 0);
@@ -813,10 +813,79 @@ function account_profile_page() {
      }
 }
 
-add_filter('render_block', 'my_render_block', 10, 2);
-function my_render_block($block_content, $parsed_block) {
-    if ($parsed_block['blockName'] == 'woocommerce/cart') {
-        $a = $block_content;
+add_action('woocommerce_before_cart', 'update_mlmsoft_wallet_coupon', 10, 0);
+add_action('woocommerce_account_wc-smart-coupons_endpoint', 'update_mlmsoft_wallet_coupon', 10, 0);
+function update_mlmsoft_wallet_coupon()
+{
+    $mlmSoftCouponGenerator = MlmSoftCouponGenerator::getInstance();
+    $user = wp_get_current_user();
+    $couponCode = get_user_meta($user->ID, 'wallet_coupon_code', true);
+
+    if (!$couponCode) {
+        $coupon = $mlmSoftCouponGenerator->generateCoupon($user->user_email, 0, 15, '', 'mlmsoft_wallet_discount');
+        add_user_meta($user->ID, 'wallet_coupon_code', $coupon->get_code());
+    } else {
+        $couponId = wc_get_coupon_id_by_code($couponCode);
+        $coupon = new WC_Coupon($couponId);
+        if (!$coupon->get_id()) {
+            $coupon = $mlmSoftCouponGenerator->generateCoupon($user->user_email, 0, 15, '', 'mlmsoft_wallet_discount');
+            update_user_meta($user->ID, 'wallet_coupon_code', $coupon->get_code());
+            $coupon->save();
+        }
     }
-    return $block_content;
+
+    global $MlmSoft;
+    $wallets = $MlmSoft->get_wallets_balance($user->ID);
+    if (isset($wallets->list[0])) {
+        $coupon->set_amount(max($wallets->list[0]->balance, 0));
+        $coupon->save();
+    }
+}
+
+add_filter('woocommerce_coupon_custom_discounts_array', 'apply_mlmsoft_wallet_coupon', 10, 2);
+/**
+ * @param $discounts array
+ * @param $coupon WC_Coupon
+ * @return mixed
+ */
+function apply_mlmsoft_wallet_coupon($discounts, $coupon) {
+
+    global $woocommerce;
+    /** @var WC_Cart $cart */
+    $cart = $woocommerce->cart;
+
+    $rbd = RBD_Plugin::getInstance();
+    $rbd_discounts = $rbd->calcDiscounts($cart);
+
+    $totalRbdSum = 0;
+    foreach ($rbd_discounts as $discount) {
+        $totalRbdSum += array_sum($discount['discounts']);
+    }
+
+    $totalCartSum = 0;
+    $cartContents = $cart->get_cart_contents();
+    foreach ($cartContents as $cart_item_key => $cart_item) {
+        $totalCartSum += $cart_item['line_subtotal'];
+    }
+
+    $totalCouponDiscount = floatval(min($totalCartSum - $totalRbdSum, $coupon->get_amount()));
+
+    foreach ($cartContents as $cart_item_key => $cart_item) {
+        if ($totalCouponDiscount == 0) {
+            break;
+        }
+        $subtotal = $cart_item['line_subtotal'];
+        $currentDiscountValue = min($subtotal, $totalCouponDiscount);
+
+        $discounts[$cart_item_key] = wc_add_number_precision($currentDiscountValue);
+        $totalCouponDiscount -= $currentDiscountValue;
+    }
+    return $discounts;
+}
+
+add_filter('woocommerce_coupon_discount_types', 'mlmsoft_wallet_coupon_discount_type', 10, 1);
+function mlmsoft_wallet_coupon_discount_type($discount_types)
+{
+    $discount_types['mlmsoft_wallet_discount'] = __('MLM Soft wallet discount', 'woocommerce');
+    return $discount_types;
 }
