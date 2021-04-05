@@ -44,58 +44,83 @@ class RBD_Plugin
         $currentUser = wp_get_current_user();
         if (wc_user_has_role($currentUser, $userRole)) {
             $percentage = round($this->options->get_option_value(RBD_Options::DISCOUNT_VALUE_KEY, 0) / 100, 2);
-            $excludedCategoriesOption = $this->options->get_option_value(RBD_Options::EXCLUDED_CATEGORIES_KEY, []);
-            $excludedCategoriesSlugs = explode(',', $excludedCategoriesOption);
-            /** @var WP_Term[] $excludedCategoriesArray */
-            $excludedCategoriesArray = [];
-            foreach ($excludedCategoriesSlugs as $slug) {
-                $category = get_term_by('slug', trim($slug), 'product_cat');
-                if (!empty($category)) {
-                    $excludedCategoriesArray[] = $category;
-                }
-            }
-            /** @var WP_Term[] $excludedCategories */
-            $excludedCategories = [];
+            $discounts = $this->calcDiscounts($cart);
 
-            foreach ($excludedCategoriesArray as $key => $category) {
-                $excludedCategories[$category->term_id] = $category;
-            }
-
-            /** @var WP_Term[] $categories */
-            $categories = [];
-
-            $items = $cart->get_cart_contents();
-            $product_category = [];
-
-            foreach ($items as $item) {
-                $category = $item['data']->get_category_ids();
-                $product_id = $item['product_id'];
-                $quantity = $item['quantity'];
-                if (isset($category[0]) && !isset($excludedCategories[$category[0]])) {
-                    $productCat = get_term_by('term_id', $category[0], 'product_cat');
-                    $categories[$productCat->term_id] = $productCat;
-                    if (!isset($product_category[$category[0]])) {
-                        $product_category[$category[0]] = [
-                            'quantity' => $quantity,
-                            'products' => [
-                                $product_id
-                            ],
-                            'sum' => $item['line_subtotal']
-                        ];
-                    } else {
-                        $product_category[$category[0]]['quantity'] += $quantity;
-                        $product_category[$category[0]]['products'][] = $product_id;
-                        $product_category[$category[0]]['sum'] += $item['line_subtotal'];
-                    }
-                }
-            }
-
-            foreach ($product_category as $cat_id => $data) {
-                $discount = $data['sum'] * $percentage;
-                $name = $categories[$cat_id]->name;
+            foreach ($discounts as $cat_id => $data) {
+                $discount = array_sum($data['discounts']);
+                $name = $data['category']->name;
                 $discount_value = $percentage * 100;
                 $cart->add_fee("{$name} (-{$discount_value} %)", -$discount);
             }
         }
+    }
+
+    public function calcDiscounts($cart)
+    {
+        $categories = $this->getIncludedCategories($cart);
+        $percentage = round($this->options->get_option_value(RBD_Options::DISCOUNT_VALUE_KEY, 0) / 100, 2);
+
+        $items = $cart->get_cart_contents();
+        $discounts = [];
+
+        foreach ($items as $key => $item) {
+            $category = $item['data']->get_category_ids();
+            $quantity = $item['quantity'];
+            if (isset($category[0], $categories[$category[0]])) {
+                $categoryId = $category[0];
+                if (!isset($discounts[$categoryId])) {
+                    $discounts[$categoryId] = [
+                        'quantity' => $quantity,
+                        'products' => [$key => $item],
+                        'discounts' => [$key => $item['line_subtotal'] * $percentage],
+                        'sum' => $item['line_subtotal']
+                    ];
+                    $discounts[$categoryId]['category'] = $categories[$categoryId];
+                } else {
+                    $discounts[$categoryId]['quantity'] += $quantity;
+                    $discounts[$categoryId]['products'][$key] = $item;
+                    $discounts[$categoryId]['discounts'][$key] = $item['line_subtotal'] * $percentage;
+                    $discounts[$categoryId]['sum'] += $item['line_subtotal'];
+                }
+            }
+        }
+
+        return $discounts;
+    }
+
+    public function getIncludedCategories($cart)
+    {
+        $excludedCategoriesOption = $this->options->get_option_value(RBD_Options::EXCLUDED_CATEGORIES_KEY, []);
+        $excludedCategoriesSlugs = explode(',', $excludedCategoriesOption);
+        /** @var WP_Term[] $excludedCategoriesArray */
+        $excludedCategoriesArray = [];
+        foreach ($excludedCategoriesSlugs as $slug) {
+            $category = get_term_by('slug', trim($slug), 'product_cat');
+            if (!empty($category)) {
+                $excludedCategoriesArray[] = $category;
+            }
+        }
+        /** @var WP_Term[] $excludedCategories */
+        $excludedCategories = [];
+
+        foreach ($excludedCategoriesArray as $key => $category) {
+            $excludedCategories[$category->term_id] = $category;
+        }
+
+        /** @var WP_Term[] $categories */
+        $categories = [];
+
+        $items = $cart->get_cart_contents();
+        foreach ($items as $item) {
+            $category = $item['data']->get_category_ids();
+            if (isset($category[0]) && !isset($excludedCategories[$category[0]])) {
+                $productCategory = get_term_by('term_id', $category[0], 'product_cat');
+                $categories[$productCategory->term_id] = $productCategory;
+            }
+        }
+
+        ksort($categories);
+
+        return $categories;
     }
 }
