@@ -333,6 +333,25 @@ class MlmSoft
         return $response->isPrimarySuccess();
     }
 
+    public function get_wallets_balance($userId)
+    {
+        $account_id = get_user_meta($userId, 'account_id', true);
+
+        $params = array(
+            'accountId' => $account_id
+        );
+
+        $response = new MlmSoftApiResponse($this->apiClient->execGet(
+            '/api2/online-office/account/get-wallets-balance',
+            $params
+        ));
+        if ($response->isPrimarySuccess()) {
+            return $response->getPrimaryPayload();
+        }
+
+        return null;
+    }
+
     public function format_property_values($properties)
     {
         $result = [];
