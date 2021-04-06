@@ -11,7 +11,7 @@ class MLMSoftSSO_Plugin
     private static $instance;
 
     /**
-     * @var MLMSoft_Options
+     * @var MLMSoftSSO_Options
      */
     public $options;
 
