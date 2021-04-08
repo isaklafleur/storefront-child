@@ -812,3 +812,14 @@ function account_profile_page() {
         echo "<p>$title ($alias): $value</p>";
      }
 }
+
+add_filter('wp_nav_menu_objects', 'wp_nav_menu_objects', 10, 2);
+function wp_nav_menu_objects($menuItems, $args) {
+    /** @var WP_Post $menuItem */
+    foreach ($menuItems as $menuItem) {
+        if ($menuItem->post_name == 'logout') {
+            $menuItem->url = wp_logout_url(home_url('/'));
+        }
+    }
+    return $menuItems;
+}
