@@ -620,16 +620,19 @@ function storeapps_handle_smart_coupons_hooks()
 add_action('woocommerce_after_add_to_cart_button', 'my_social_btn');
 function my_social_btn()
 {
-    // get current url
-
-    // ALEKSANDER, PLEASE ADD CODE, FOLLOW INSTRUCTIONS
-    // NEED TO ADD REFERAL ID IN THOSE LINKS
-    // 1. IF USER IS LOGGED IN, THEN IT SHOULD TAKE THE USERS REF ID
-    // 2. IF USER IS NOT LOGGED IN, LOOK FOR REF ID IN COOKIE
-    // 3. NOT LOGGED IN OR NO REF ID IN COOKIE, THEN DONT ADD REF ID IN URL
+    $queryArgs = [];
+    $userId = get_current_user_id();
+    if (!$userId && isset($_SESSION['referral_data'], $_SESSION['referral_data']['invite_code']) && !empty($_SESSION['referral_data']['invite_code'])) {
+        $inviteCode = $_SESSION['referral_data']['invite_code'];
+    } else {
+        $inviteCode = get_user_meta($userId, 'invite_code', true);
+    }
+    if ($inviteCode) {
+        $queryArgs['referral'] = $inviteCode;
+    }
 
     global $wp;
-    $current_url = home_url(add_query_arg(array(), $wp->request));
+    $current_url = home_url(add_query_arg($queryArgs, $wp->request));
     echo '<div class="my-custom-social">
   <a href="https://www.facebook.com/sharer/sharer.php?u=' . $current_url . '" target="_blank" class="social fb"><i class="fab fa-facebook-square"></i></a>
   <a href="https://twitter.com/intent/tweet?url=' . $current_url . '" target="_blank" class="social tw"><i class="fab fa-twitter-square"></i></a>
