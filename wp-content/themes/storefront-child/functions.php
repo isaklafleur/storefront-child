@@ -733,8 +733,14 @@ function setUpgradePage($template) {
 
 add_filter('woocommerce_account_menu_items', 'set_profile_menus', 10, 1);
 function set_profile_menus($items) {
-    $items = insert_after($items, 'my-profile', 'Profile', 'dashboard');
-    $items = insert_after($items, 'referral-links', 'Referral links', 'my-profile');
+    $user = wp_get_current_user();
+    if (!$user->ID) {
+        return $items;
+    }
+    if (wc_user_has_role($user, 'affiliate') || wc_user_has_role($user, 'brandpartner')) {
+        $items = insert_after($items, 'my-profile', 'Profile', 'dashboard');
+        $items = insert_after($items, 'referral-links', 'Referral links', 'my-profile');
+    }
     return $items;
 }
 
