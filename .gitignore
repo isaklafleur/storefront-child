@@ -491,6 +491,7 @@ composer.lock
 !/wp-content/plugins/mlmsoft-coupon-generator/
 !/wp-content/plugins/role-based-discounts/
 !/wp-content/plugins/mlm-soft-wallet-coupons/
+!/wp-content/plugins/geo-redirect/
 
 # Theme
 
