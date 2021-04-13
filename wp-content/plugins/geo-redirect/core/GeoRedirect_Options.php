@@ -22,14 +22,31 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
         $this->addOption(self::DEFAULT_SITE_URL, 'Default site URL', self::TYPE_TEXT_FIELD, 'section_1');
 
         $i = 0;
-        for (;get_option(self::PLUGIN_PREFIX . self::COUNTRY_URL_MATH_COUNTRY . '_' . $i); $i++) {
+        for (; get_option(self::PLUGIN_PREFIX . self::COUNTRY_URL_MATH_COUNTRY . '_' . $i); $i++) {
             $this->addOption(self::COUNTRY_URL_MATH_COUNTRY . '_' . $i, 'Countries ' . ($i + 1), self::TYPE_TEXT_FIELD, 'section_2', null, null, 'Enter the countries, separated by commas.');
             $this->addOption(self::COUNTRY_URL_MATH_URL . '_' . $i, 'URL ' . ($i + 1), self::TYPE_TEXT_FIELD, 'section_2');
         }
 
-        $this->addOption(self::COUNTRY_URL_MATH_COUNTRY . '_' . $i, 'Countries ' . ($i + 1), self::TYPE_TEXT_FIELD, 'section_2',null, null, 'Enter the countries, separated by commas.');
+        $this->addOption(self::COUNTRY_URL_MATH_COUNTRY . '_' . $i, 'Countries ' . ($i + 1), self::TYPE_TEXT_FIELD, 'section_2', null, null, 'Enter the countries, separated by commas.');
         $this->addOption(self::COUNTRY_URL_MATH_URL . '_' . $i, 'URL ' . ($i + 1), self::TYPE_TEXT_FIELD, 'section_2');
 
         $this->_init();
+    }
+
+    public function getURLMatch($country)
+    {
+        for ($i = 0; $option = get_option(self::PLUGIN_PREFIX . self::COUNTRY_URL_MATH_COUNTRY . '_' . $i); $i++) {
+            $countryList = explode(',', $option);
+            foreach ($countryList as $value) {
+                if (trim($value) == $country) {
+                    $url = $this->get_option_value(self::COUNTRY_URL_MATH_URL . '_' . $i);
+                    if (!$url) {
+                        return $this->get_option_value(self::DEFAULT_SITE_URL, get_site_url());
+                    }
+                    return $url;
+                }
+            }
+        }
+        return $this->get_option_value(self::DEFAULT_SITE_URL, get_site_url());
     }
 }
