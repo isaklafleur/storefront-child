@@ -9,7 +9,7 @@ class GeoRedirectOptionItem
     public $afterLabel;
     public $value;
     public $section;
-    public $selectOptions;
+    public $payload;
 
     public function __construct($data)
     {

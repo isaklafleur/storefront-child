@@ -16,6 +16,8 @@ class GeoRedirect_OptionsBase
 
     const TYPE_TEXT_FIELD = 'text';
     const TYPE_SELECT_FIELD = 'select';
+    const TYPE_TABLE = 'table';
+    const TYPE_CUSTOM_ACTION = 'custom_action';
 
     public function __construct($pluginPrefix, $optionsTitle, $pluginBaseName)
     {
@@ -29,18 +31,36 @@ class GeoRedirect_OptionsBase
         add_action('admin_menu', array($this, 'add_options'));
         add_action('admin_init', array($this, 'register_settings'));
         add_filter('plugin_action_links', array($this, 'addPluginActionLinks'), 10, 2);
+        add_action('admin_post_' . $this->pluginPrefix . 'custom_action', [$this, 'custom_action_handler']);
     }
 
-    public function _init() {
+    public function _init()
+    {
         foreach ($this->options as $key => $option) {
-            $option->value = get_option($option->id);
+            $this->initRecursive($option);
+        }
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem
+     */
+    protected function initRecursive($option) {
+        $option->value = get_option($option->id);
+        if (isset($option->payload['tableData'])) {
+            foreach ($option->payload['tableData']['optionRows'] as $row) {
+                foreach ($row as $opt) {
+                    $this->initRecursive($opt);
+                }
+            }
         }
     }
 
     public function get_option_value($key, $default = null)
     {
-        if (isset($this->options[$key])) {
-            return $this->options[$key]->value;
+        $id = $this->pluginPrefix . $key;
+        $val = get_option($id);
+        if ($val) {
+            return $val;
         } else {
             return $default;
         }
@@ -67,6 +87,36 @@ class GeoRedirect_OptionsBase
         <?php
     }
 
+    public function custom_action_handler()
+    {
+        $optionId = $_GET['option'];
+        if (!$optionId) {
+            return;
+        }
+        foreach ($this->options as $option) {
+            $this->customActionRecursive($option, $optionId);
+        }
+        wp_redirect('/wp-admin/admin.php?page=' . $this->pluginPrefix . 'settings');
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem
+     * @param $id
+     */
+    protected function customActionRecursive($option, $id) {
+        if ($option->id == $id && $option->payload['callback']) {
+            call_user_func($option->payload['callback'], $option);
+            return;
+        }
+        if (isset($option->payload['tableData'])) {
+            foreach ($option->payload['tableData']['optionRows'] as $row) {
+                foreach ($row as $opt) {
+                    $this->customActionRecursive($opt, $id);
+                }
+            }
+        }
+    }
+
     protected function addOption($alias, $label, $type, $section, $selectOptions = [], $value = '', $afterLabel = '')
     {
         $this->options[$alias] = new GeoRedirectOptionItem([
@@ -78,6 +128,31 @@ class GeoRedirect_OptionsBase
             'section' => $section,
             'selectOptions' => $selectOptions
         ]);
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem
+     */
+    protected function addOptionRaw($option)
+    {
+        $alias = $option->id;
+        $this->addPluginPrefixRecursive($option);
+        $this->options[$alias] = $option;
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem
+     */
+    protected function addPluginPrefixRecursive(&$option)
+    {
+        $option->id = $this->pluginPrefix . $option->id;
+        if (isset($option->payload['tableData'])) {
+            foreach ($option->payload['tableData']['optionRows'] as $row) {
+                foreach ($row as $opt) {
+                    $this->addPluginPrefixRecursive($opt);
+                }
+            }
+        }
     }
 
     protected function addSection($alias, $title)
@@ -102,6 +177,36 @@ class GeoRedirect_OptionsBase
                 $this->pluginPrefix . $option->section,
                 [$option]
             );
+            if (isset($option->payload['tableData'])) {
+                foreach ($option->payload['tableData']['optionRows'] as $row) {
+                    foreach ($row as $opt) {
+                        $this->registerSettingsRecursive($opt);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem
+     */
+    protected function registerSettingsRecursive($option)
+    {
+        register_setting($this->pluginPrefix . 'options', $option->id, '');
+        add_settings_field(
+            $option->id,
+            $option->label,
+            null,
+            $this->pluginPrefix . 'settings',
+            $this->pluginPrefix . $option->section,
+            [$option]
+        );
+        if (isset($option->payload['tableData'])) {
+            foreach ($option->payload['tableData']['optionRows'] as $row) {
+                foreach ($row as $opt) {
+                    $this->registerSettingsRecursive($opt);
+                }
+            }
         }
     }
 
@@ -139,7 +244,7 @@ class GeoRedirect_OptionsBase
         $option = $option[0];
         echo "<select id='$option->id' name='$option->id'>";
 
-        foreach ($option->selectOptions as $value => $label) {
+        foreach ($option->payload['selectOptions'] as $value => $label) {
             if (get_option($option->id) == $value) {
                 echo "<option selected value='$value'>$label</option>";
             } else {
@@ -151,5 +256,44 @@ class GeoRedirect_OptionsBase
             echo "<span class='after_label'>$option->afterLabel</span>";
         }
         echo '</select>';
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem[]
+     */
+    public function callback_for_table($option)
+    {
+        $option = $option[0];
+        echo '<table><thead><tr>';
+        $head = $option->payload['tableData']['head'];
+        foreach ($head as $item) {
+            echo "<th>$item</th>";
+        }
+        $optionRows = $option->payload['tableData']['optionRows'];
+        echo '</tr></thead>';
+        echo '<tbody>';
+        foreach ($optionRows as $row) {
+            echo '<tr>';
+            /** @var GeoRedirectOptionItem $opt */
+            foreach ($row as $opt) {
+                $callback = 'callback_for_' . $opt->type;
+                if (method_exists($this, $callback)) {
+                    echo '<td>';
+                    $this->$callback([$opt]);
+                    echo '</td>';
+                }
+            }
+            echo '</tr>';
+        }
+        echo '</tbody></table>';
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem[]
+     */
+    public function callback_for_custom_action($option)
+    {
+        $option = $option[0];
+        echo '<a href="' . get_admin_url() . 'admin-post.php?action=' . $this->pluginPrefix . 'custom_action&option=' . $option->id . '">' . $option->label . '</a>';
     }
 }

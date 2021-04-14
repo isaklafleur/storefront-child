@@ -40,21 +40,50 @@ class GeoRedirect_Plugin
 
     public function check_geo_and_redirect()
     {
-        if (is_admin()) {
+        if (is_admin() || $this->checkNotProcessing($_SERVER['REQUEST_URI'])) {
             return;
         }
+
+        $currentCountries = $this->options->getCountriesByURL(get_site_url());
+
+        $clientCountry = isset($_COOKIE['theuntamed_country']) ? $_COOKIE['theuntamed_country'] : '';
+        $clientLocale = isset($_COOKIE['theuntamed_locale']) ? $_COOKIE['theuntamed_locale'] : '';
+
+        if ($clientCountry && in_array($clientCountry, $currentCountries)) {
+            return;
+        }
+
+        $ip = $_SERVER['REMOTE_ADDR'];
+
         $maxMind_Geolocation = new WC_Integration_MaxMind_Geolocation();
-        $locationData = $maxMind_Geolocation->get_geolocation([], $_SERVER['REMOTE_ADDR']);
+        $locationData = $maxMind_Geolocation->get_geolocation([], $ip);
 
         if (!$locationData['country']) {
             return;
         }
 
-        $url = $this->options->getURLMatch($locationData['country']);
+        $country = $locationData['country'];
+
+        $url = $this->options->getURL($country);
+        $locale = $clientLocale ?: $this->options->getLocale($country);
+
+        setcookie('theuntamed_locale', $locale, time() + (365 * 24 * 60 * 60), '/', '.theuntamed.com');
+        setcookie('theuntamed_country', $country, time() + (365 * 24 * 60 * 60), '/', '.theuntamed.com');
 
         if ($url && $url != get_site_url()) {
             $url .= $_SERVER['REQUEST_URI'];
             wp_redirect($url);
         }
+    }
+
+    public function checkNotProcessing($url)
+    {
+        $urls = explode(',', $this->options->get_option_value(GeoRedirect_Options::NOT_PROCESSING_URLS, ''));
+        foreach ($urls as $urlVal) {
+            if (strpos($url, trim($urlVal)) !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 }
