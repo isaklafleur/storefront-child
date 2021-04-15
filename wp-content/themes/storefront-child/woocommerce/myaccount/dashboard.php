@@ -47,7 +47,7 @@ if (array_intersect($allowed_roles, $user->roles)) {
 ?>
 	<p>
 		<!-- If user is logged in on WooCommerce, is it possible to log in the user automatic here? //Isak -->
-		<a href="https://lbrty.onlineoffice.pro/" target="_blank" rel="noopener">Go to your Online Back Office</a>
+		<a href="https://backoffice.theuntamed.com/" target="_blank" rel="noopener">Go to your Online Back Office</a>
 	</p>
 <?php } ?>
 <p>
