@@ -15,11 +15,11 @@ $stepNum = $customEnrollmentProcess->getStepNum($enrollId);
 if (!$stepNum) {
     $customEnrollmentProcess->createNewEnrollSession(4);
     $customEnrollmentProcess->setSessionPayload(['upgrade' => true]);
-    $customEnrollmentProcess->redirectToStep(1);
+    $customEnrollmentProcess->redirectToStep(CE_Process::PAGE_UPGRADE, 1);
 } else {
     $templatePath = plugin_dir_path(__FILE__) . '../pages/upgrade-page.php';
 
-    $templatePathFilter = apply_filters('custom_enrollment_upgrade_template_page', $templatePath);
+    $templatePathFilter = apply_filters('custom_enrollment_upgrade_template_page', $templatePath, $stepNum);
 
     if (!empty($templatePathFilter) && !file_exists($templatePathFilter)) {
         wc_add_notice('Template page for upgrade not found', 'error');

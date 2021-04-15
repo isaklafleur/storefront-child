@@ -2,7 +2,6 @@
 /**
  * @var $customEnrollmentProcess CE_Process
  * @var $stepNum integer
- * @var $isUpgrade boolean
  */
 
 $userType = $customEnrollmentProcess->getStepPayload(1)['type'];
@@ -18,29 +17,19 @@ if (isset($_REQUEST['product-pack']) && isset(CE_ProcessOptions::PRODUCT_PACKS[$
     ]);
 
     if ($purchaseRejection) {
-        if ($isUpgrade) {
-            wp_redirect(wc_get_checkout_url());
-            exit;
-        }
-        $customEnrollmentProcess->redirectToStep(3);
+        wp_redirect(wc_get_checkout_url());
+        exit;
     }
     $plugin = CE_ProcessPlugin::getInstance();
 
     $productSKU = $plugin->getOptionValue($productPack . CE_ProcessOptions::PRODUCT_PACK_POSTFIX, '');
     $productId = wc_get_product_id_by_sku($productSKU);
     if (!$productId) {
-        if ($isUpgrade) {
-            wp_redirect(wc_get_checkout_url());
-            exit;
-        }
-        $customEnrollmentProcess->redirectToStep(3);
+        wp_redirect(wc_get_checkout_url());
+        exit;
     }
     $productUrl = get_permalink($productId);
-    if ($isUpgrade) {
-        $customEnrollmentProcess->addAfterAddToCartRedirectAction($productId, wc_get_checkout_url());
-    } else {
-        $customEnrollmentProcess->addAfterAddToCartRedirectAction($productId, $customEnrollmentProcess->getStepUrl(3));
-    }
+    $customEnrollmentProcess->addAfterAddToCartRedirectAction($productId, wc_get_checkout_url());
     wp_redirect($productUrl);
     exit;
 }
@@ -48,7 +37,7 @@ if (isset($_REQUEST['product-pack']) && isset(CE_ProcessOptions::PRODUCT_PACKS[$
 get_header('shop'); ?>
 
 <header>
-    <h1 style="text-align: center;"><?php echo ($isUpgrade ? 'Upgrade to ' : 'Registration as ') . $customEnrollmentProcess->getStepPayload(1)['type'] ?></h1>
+    <h1 style="text-align: center;"><?php echo 'Upgrade to ' . $customEnrollmentProcess->getStepPayload(1)['type'] ?></h1>
 </header>
 
 <form method="POST" class="woocommerce-form woocommerce-form-register">

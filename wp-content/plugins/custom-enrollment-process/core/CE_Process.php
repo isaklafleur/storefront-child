@@ -4,7 +4,9 @@
 class CE_Process
 {
     private const ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    public const COUNT_STEPS = 4;
+
+    public const PAGE_ENROLLMENT = 'enrollment';
+    public const PAGE_UPGRADE = 'upgrade';
 
     /**
      * Current enrollment session data
@@ -131,6 +133,18 @@ class CE_Process
     }
 
     /**
+     * Adds a payload to session
+     *
+     * @param $key
+     * @param $data
+     */
+    public function addToSessionPayload($key, $data)
+    {
+        $this->enrollmentData->sessionPayload[$key] = $data;
+        $this->saveSession();
+    }
+
+    /**
      * Returns payload of enrollment session
      *
      * @return array
@@ -148,12 +162,20 @@ class CE_Process
      */
     public function addAfterAddToCartRedirectAction($productId, $url)
     {
-        $this->setSessionPayload([
-            'redirectAfterAddToCart' => [
-                'productId' => $productId,
-                'redirectUrl' => $url
-            ]
+        $this->addToSessionPayload('redirectAfterAddToCart', [
+            'productId' => $productId,
+            'redirectUrl' => $url
         ]);
+    }
+
+    /**
+     * Adds autofill fields to the checkout page
+     *
+     * @param $data
+     */
+    public function addAutofillCheckoutFields($data)
+    {
+        $this->addToSessionPayload('autofillCheckoutFields', $data);
     }
 
     /**
@@ -184,9 +206,9 @@ class CE_Process
      *
      * @param int $num Step number
      */
-    public function redirectToStep($num)
+    public function redirectToStep($page, $num)
     {
-        wp_redirect($this->getStepUrl($num));
+        wp_redirect($this->getStepUrl($page, $num));
         exit();
     }
 
@@ -196,12 +218,12 @@ class CE_Process
      * @param int $num
      * @return string
      */
-    public function getStepUrl($num)
+    public function getStepUrl($page, $num)
     {
         if (isset($this->enrollmentData->steps[$num])) {
-            return '/enrollment/' . $this->getStepId($num);
+            return '/' . $page . '/' . $this->getStepId($num);
         } else {
-            return '/enrollment/' . $this->getStepId(1);
+            return '/' . $page . '/' . $this->getStepId(1);
         }
     }
 

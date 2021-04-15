@@ -2,7 +2,6 @@
 /**
  * @var $customEnrollmentProcess CE_Process
  * @var $stepNum integer
- * @var $isUpgrade boolean
  */
 
 $customEnrollmentProcess->cart->clearCart();
@@ -12,16 +11,16 @@ $userTypes = [
     'brandpartner' => 'Brand partner'
 ];
 
-if ($isUpgrade) {
-    $user = wp_get_current_user();
-    $roles = $user->roles;
-    if (in_array('affiliate', $roles)) {
-        unset($userTypes['affiliate']);
-    }
-    if (in_array('brandpartner', $roles)) {
-        $userTypes = [];
-    }
+
+$user = wp_get_current_user();
+$roles = $user->roles;
+if (in_array('affiliate', $roles)) {
+    unset($userTypes['affiliate']);
 }
+if (in_array('brandpartner', $roles)) {
+    $userTypes = [];
+}
+
 
 if (isset($_REQUEST['user-type'])) {
     $customEnrollmentProcess->setStepPayload(1, [
@@ -33,13 +32,15 @@ if (isset($_REQUEST['user-type'])) {
     } else {
         $customEnrollmentProcess->cart->addToCart(CE_ProcessCart::AFFILIATE_OPTION);
     }
-    $customEnrollmentProcess->redirectToStep(2);
+    $customEnrollmentProcess->redirectToStep(CE_Process::PAGE_UPGRADE, 2);
 }
+
+
 get_header('shop'); ?>
 
-<header>
-    <h1 style="text-align: center;"><?php echo($isUpgrade ? 'Upgrade' : 'Registration') ?></h1>
-</header>
+    <header>
+        <h1 style="text-align: center;"><?php echo('Upgrade') ?></h1>
+    </header>
 
 <?php if (empty($userTypes)) { ?>
     You have maximum level. No upgrades available

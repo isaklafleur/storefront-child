@@ -16,7 +16,7 @@ if ($stepNum) {
 $user = wp_get_current_user();
 if ($user->ID && !$isUpgrade) {
     $customEnrollmentProcess->clearEnrollmentSession();
-    wp_redirect('/upgrade');
+    wp_redirect('/' . CE_Process::PAGE_UPGRADE);
     exit;
 }
 
@@ -31,12 +31,12 @@ if ($enrollId == 'affiliate' || $enrollId == 'brandpartner') {
     } else {
         $customEnrollmentProcess->cart->addToCart(CE_ProcessCart::AFFILIATE_OPTION);
     }
-    $customEnrollmentProcess->redirectToStep(2);
+    $customEnrollmentProcess->redirectToStep(CE_Process::PAGE_ENROLLMENT,2);
 }
 
 if (!$stepNum) {
     $customEnrollmentProcess->createNewEnrollSession(4);
-    $customEnrollmentProcess->redirectToStep(1);
+    $customEnrollmentProcess->redirectToStep(CE_Process::PAGE_ENROLLMENT,1);
 } else {
     $templatePath = plugin_dir_path(__FILE__) . '../pages/enrollment-page-' . $stepNum . '.php';
 

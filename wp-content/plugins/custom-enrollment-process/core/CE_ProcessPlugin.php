@@ -74,6 +74,8 @@ class CE_ProcessPlugin
         //add_action('woocommerce_add_to_cart', [$this, 'addProductToCart'], 10, 2);
         add_filter('woocommerce_add_to_cart_redirect', [$this, 'addProductToCart'], 10, 2);
         add_filter('woocommerce_product_tabs', [$this, 'removeProductTabs'], 100, 1);
+
+        add_filter('woocommerce_form_field_args', [$this, 'autofillCheckoutFields'], 10, 3);
     }
 
     /**
@@ -82,8 +84,8 @@ class CE_ProcessPlugin
     public function addRewriteRules()
     {
         add_rewrite_tag('%enroll_id%', '([^&]+)');
-        add_rewrite_rule('enrollment/([^/]*)?', 'index.php?pagename=enrollment&enroll_id=$matches[1]', 'top');
-        add_rewrite_rule('upgrade/([^/]*)?', 'index.php?pagename=upgrade&enroll_id=$matches[1]', 'top');
+        add_rewrite_rule(CE_Process::PAGE_ENROLLMENT . '/([^/]*)?', 'index.php?pagename=' . CE_Process::PAGE_ENROLLMENT . '&enroll_id=$matches[1]', 'top');
+        add_rewrite_rule(CE_Process::PAGE_UPGRADE . '/([^/]*)?', 'index.php?pagename=' . CE_Process::PAGE_UPGRADE . '&enroll_id=$matches[1]', 'top');
         flush_rewrite_rules(true);
     }
 
@@ -186,5 +188,18 @@ class CE_ProcessPlugin
             return [];
         }
         return $tabs;
+    }
+
+    public function autofillCheckoutFields($args, $key, $value)
+    {
+        $customEnrollmentProcess = new CE_Process();
+        $sessionPayload = $customEnrollmentProcess->getSessionPayload();
+        if (isset($sessionPayload['autofillCheckoutFields'])) {
+            $fields = $sessionPayload['autofillCheckoutFields'];
+            if (isset($fields[$key])) {
+                $args['default'] = $fields[$key];
+            }
+        }
+        return $args;
     }
 }

@@ -715,16 +715,16 @@ function check_valid_coupons($isValid, $coupon) {
 
 add_filter('custom_enrollment_process_template_page', 'setCustomEnrollmentPageTemplate', 10, 2);
 function setCustomEnrollmentPageTemplate($template, $stepNum) {
-    $path = get_theme_file_path('custom-enrollment-process/page-templates') . "/enrollment-page-$stepNum.php";
+    $path = get_theme_file_path('custom-enrollment-process/page-templates/enrollment') . "/page-$stepNum.php";
     if (file_exists($path)) {
         return $path;
     }
     return $template;
 }
 
-add_filter('custom_enrollment_upgrade_template_page', 'setUpgradePage', 10, 1);
-function setUpgradePage($template) {
-    $path = get_theme_file_path('custom-enrollment-process/page-templates') . "/upgrade-page.php";
+add_filter('custom_enrollment_upgrade_template_page', 'setUpgradePage', 10, 2);
+function setUpgradePage($template, $stepNum) {
+    $path = get_theme_file_path('custom-enrollment-process/page-templates/upgrade') . "/page-$stepNum.php";
     if (file_exists($path)) {
         return $path;
     }
