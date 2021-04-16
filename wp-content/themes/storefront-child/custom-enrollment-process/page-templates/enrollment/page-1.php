@@ -20,6 +20,15 @@ if (isset($_REQUEST['enrollment-step-1'])) {
             'username' => $_REQUEST['username'],
             'email' => $_REQUEST['email']
         ]);
+
+        $plugin = CE_ProcessPlugin::getInstance();
+
+        if (!$plugin->db->userExists($_REQUEST['email'])) {
+            $plugin->db->addUser($_REQUEST['email'], $_REQUEST['username'], 1);
+        } else {
+            $plugin->db->userUpdate($_REQUEST['email'], $_REQUEST['username'], 1);
+        }
+
         $customEnrollmentProcess->redirectToStep(CE_Process::PAGE_ENROLLMENT, 2);
     }
 }

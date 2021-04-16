@@ -22,6 +22,15 @@ if (isset($_REQUEST['user-type'])) {
     } else {
         $customEnrollmentProcess->cart->addToCart(CE_ProcessCart::AFFILIATE_OPTION);
     }
+
+    $email = $customEnrollmentProcess->getStepPayload(1)['email'];
+
+    if ($plugin->db->userExists($email)) {
+        $plugin->db->userUpdate($email, $username, 2);
+    } else {
+        $plugin->db->addUser($email, $username, 2);
+    }
+
     $customEnrollmentProcess->redirectToStep(CE_Process::PAGE_ENROLLMENT, 3);
 }
 

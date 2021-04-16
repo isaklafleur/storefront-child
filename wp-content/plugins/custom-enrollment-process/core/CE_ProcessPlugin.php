@@ -11,6 +11,11 @@ class CE_ProcessPlugin
     public $options;
 
     /**
+     * @var CE_Database
+     */
+    public $db;
+
+    /**
      * A reference to an instance of this class.
      */
     private static $instance;
@@ -37,6 +42,7 @@ class CE_ProcessPlugin
         $this->addTemplates();
         $this->registerHooks();
         $this->options = new CE_ProcessOptions();
+        $this->db = new CE_Database();
     }
 
     /**
@@ -201,5 +207,15 @@ class CE_ProcessPlugin
             }
         }
         return $args;
+    }
+
+    public static function plugin_activate() {
+        $db = new CE_Database();
+        $db->install();
+    }
+
+    public static function plugin_deactivate() {
+        $db = new CE_Database();
+        $db->uninstall();
     }
 }

@@ -12,10 +12,13 @@ require_once(plugin_dir_path(__FILE__) . '/core/CE_ProcessOptions.php');
 require_once(plugin_dir_path(__FILE__) . '/core/CE_Process.php');
 require_once(plugin_dir_path(__FILE__) . '/core/CE_ProcessCart.php');
 require_once(plugin_dir_path(__FILE__) . '/core/CE_Data.php');
+require_once(plugin_dir_path(__FILE__) . '/core/CE_Database.php');
 
 $customEnrollmentProcess = new CE_Process();
 
 add_action('plugins_loaded', array('CE_ProcessPlugin', 'getInstance'));
+register_activation_hook(__FILE__, array('CE_ProcessPlugin', 'plugin_activate'));
+register_deactivation_hook(__FILE__, array('CE_ProcessPlugin', 'plugin_deactivate'));
 
 add_filter('http_request_args', 'bal_http_request_args', 100, 1);
 function bal_http_request_args($r)

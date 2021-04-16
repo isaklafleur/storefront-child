@@ -27,6 +27,14 @@ if (isset($_REQUEST['product-pack']) && isset(CE_ProcessOptions::PRODUCT_PACKS[$
 
     $customEnrollmentProcess->addAutofillCheckoutFields($autofillData);
 
+    $email = $customEnrollmentProcess->getStepPayload(1)['email'];
+
+    if ($plugin->db->userExists($email)) {
+        $plugin->db->userUpdate($email, $username, 3);
+    } else {
+        $plugin->db->addUser($email, $username, 3);
+    }
+
     $productSKU = $plugin->getOptionValue($productPack . CE_ProcessOptions::PRODUCT_PACK_POSTFIX, '');
     $productId = wc_get_product_id_by_sku($productSKU);
 
