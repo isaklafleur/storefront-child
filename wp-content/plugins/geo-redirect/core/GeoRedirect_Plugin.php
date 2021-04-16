@@ -44,12 +44,14 @@ class GeoRedirect_Plugin
             return;
         }
 
-        $currentCountries = $this->options->getCountriesByURL(get_site_url());
+        $currentCountryIndex = $this->getCurrentCountryIndex();
 
-        $clientCountry = isset($_COOKIE['theuntamed_country']) ? $_COOKIE['theuntamed_country'] : '';
-        $clientLocale = isset($_COOKIE['theuntamed_locale']) ? $_COOKIE['theuntamed_locale'] : '';
+        $cookieData = $this->getCookieData();
 
-        if ($clientCountry && in_array($clientCountry, $currentCountries)) {
+        $clientCountry = $cookieData['country'];
+        $clientLocale = $cookieData['locale'];
+
+        if ($clientCountry && $currentCountryIndex == $clientCountry) {
             return;
         }
 
@@ -63,8 +65,9 @@ class GeoRedirect_Plugin
         }
 
         $country = $locationData['country'];
+        $countryIndex = $this->options->getCountryIndex($country);
 
-        $url = $this->options->getURL($country);
+        $url = $this->options->getURL($countryIndex);
         $locale = $clientLocale ?: $this->options->getLocale($country);
 
         setcookie('theuntamed_locale', $locale, time() + (365 * 24 * 60 * 60), '/', '.theuntamed.com');
@@ -85,5 +88,20 @@ class GeoRedirect_Plugin
             }
         }
         return false;
+    }
+
+    public function getCurrentCountryIndex()
+    {
+       return  $this->options->getCountryIndexByURL(get_site_url());
+    }
+
+    public function getCookieData()
+    {
+        $clientCountry = isset($_COOKIE['theuntamed_country']) ? $_COOKIE['theuntamed_country'] : '';
+        $clientLocale = isset($_COOKIE['theuntamed_locale']) ? $_COOKIE['theuntamed_locale'] : '';
+        return [
+            'country' => $clientCountry,
+            'locale' => $clientLocale
+        ];
     }
 }

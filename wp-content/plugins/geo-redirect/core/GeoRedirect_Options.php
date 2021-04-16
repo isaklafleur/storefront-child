@@ -12,6 +12,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
     const URL_POSTFIX = '_url';
     const COUNTRIES_POSTFIX = '_country';
     const LOCALE_POSTFIX = '_locale';
+    const COUNTRY_TITLE_POSTFIX = '_country-title';
     const DELETE_POSTFIX = '_delete';
 
     public $options = [];
@@ -33,7 +34,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
         $option->label = 'Match options';
         $option->type = self::TYPE_TABLE;
         $tableData = [
-            'head' => ['URL', 'Countries', 'Default locale', ''],
+            'head' => ['URL', 'Countries', 'Country title', 'Default locale', ''],
             'optionRows' => []
         ];
 
@@ -54,7 +55,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
         }
 
 
-        $i = 0;
+        $i = 1;
         foreach ($matchOptions as $index => $optionValue) {
             $tableData['optionRows'][] = [
                 new GeoRedirectOptionItem([
@@ -63,6 +64,10 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
                 ]),
                 new GeoRedirectOptionItem([
                     'id' => self::MATCH_OPTIONS_PREFIX . $index . self::COUNTRIES_POSTFIX,
+                    'type' => self::TYPE_TEXT_FIELD
+                ]),
+                new GeoRedirectOptionItem([
+                    'id' => self::MATCH_OPTIONS_PREFIX . $index . self::COUNTRY_TITLE_POSTFIX,
                     'type' => self::TYPE_TEXT_FIELD
                 ]),
                 new GeoRedirectOptionItem([
@@ -89,6 +94,10 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
             ]),
             new GeoRedirectOptionItem([
                 'id' => self::MATCH_OPTIONS_PREFIX . $i . self::COUNTRIES_POSTFIX,
+                'type' => self::TYPE_TEXT_FIELD
+            ]),
+            new GeoRedirectOptionItem([
+                'id' => self::MATCH_OPTIONS_PREFIX . $i . self::COUNTRY_TITLE_POSTFIX,
                 'type' => self::TYPE_TEXT_FIELD
             ]),
             new GeoRedirectOptionItem([
@@ -121,25 +130,26 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
         delete_option($base . self::DELETE_POSTFIX);
     }
 
-    public function getURL($country)
+    public function getURL($countryIndex)
     {
+        $countryIndex = (int)$countryIndex;
         $matchOptions = $this->getMatchOptionsFromDb();
-        foreach ($matchOptions as $index => $optionsData) {
-            $countryList = explode(',', $optionsData[self::COUNTRIES_POSTFIX]);
-            foreach ($countryList as $value) {
-                if (trim($value) == $country) {
-                    $url = $this->get_option_value(self::MATCH_OPTIONS_PREFIX . $index . self::URL_POSTFIX);
-                    if (!$url) {
-                        return $this->get_option_value(self::DEFAULT_SITE_URL, get_site_url());
-                    }
-                    return $url;
-                }
-            }
+
+        $url = '';
+
+        if (isset($matchOptions[$countryIndex])) {
+            $url = $this->get_option_value(self::MATCH_OPTIONS_PREFIX . $countryIndex . self::URL_POSTFIX);
         }
-        return $this->get_option_value(self::DEFAULT_SITE_URL, get_site_url());
+
+        if (!$url) {
+            return $this->get_option_value(self::DEFAULT_SITE_URL, get_site_url());
+        }
+
+        return $url;
     }
 
-    public function getLocale($country) {
+    public function getLocale($country)
+    {
         $matchOptions = $this->getMatchOptionsFromDb();
         foreach ($matchOptions as $index => $optionsData) {
             $countryList = explode(',', $optionsData[self::COUNTRIES_POSTFIX]);
@@ -165,6 +175,45 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
             }
         }
         return [];
+    }
+
+    public function getCountryIndex($countryName)
+    {
+        $matchOptions = $this->getMatchOptionsFromDb();
+        foreach ($matchOptions as $index => $optionsData) {
+            $countries = explode(',', $optionsData[self::COUNTRIES_POSTFIX]);
+            foreach ($countries as $country) {
+                if (trim($country) == $countryName) {
+                    return $index;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function getCountryIndexByURL($url)
+    {
+        $matchOptions = $this->getMatchOptionsFromDb();
+        foreach ($matchOptions as $index => $optionsData) {
+            if ($optionsData[self::URL_POSTFIX] == $url) {
+                return $index;
+            }
+        }
+        return false;
+    }
+
+    public function getCountriesList()
+    {
+        $matchOptions = $this->getMatchOptionsFromDb();
+
+        $result = [];
+
+        foreach ($matchOptions as $index => $option) {
+            if (!empty($option[self::COUNTRY_TITLE_POSTFIX])) {
+                $result[$index] = $option[self::COUNTRY_TITLE_POSTFIX];
+            }
+        }
+        return $result;
     }
 
     private function getMatchOptionsFromDb()
