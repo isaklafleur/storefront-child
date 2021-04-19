@@ -6,6 +6,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
     const PLUGIN_PREFIX = 'geo_redirect_';
 
     const DEFAULT_SITE_URL = 'default_site_url';
+    const COOKIE_DOMAIN = 'cookie_domain';
     const NOT_PROCESSING_URLS = 'not_processing_urls';
 
     const MATCH_OPTIONS_PREFIX = 'match_option_';
@@ -27,6 +28,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
 
         $this->addOption(self::DEFAULT_SITE_URL, 'Default site URL', self::TYPE_TEXT_FIELD, 'section_1');
         $this->addOption(self::NOT_PROCESSING_URLS, 'Not processing URLs', self::TYPE_TEXT_FIELD, 'section_1');
+        $this->addOption(self::COOKIE_DOMAIN, 'Cookie domain', self::TYPE_TEXT_FIELD, 'section_1');
 
         $option = new GeoRedirectOptionItem([]);
         $option->id = 'country-url-table';
@@ -148,16 +150,11 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
         return $url;
     }
 
-    public function getLocale($country)
+    public function getLocale($countryIndex)
     {
         $matchOptions = $this->getMatchOptionsFromDb();
-        foreach ($matchOptions as $index => $optionsData) {
-            $countryList = explode(',', $optionsData[self::COUNTRIES_POSTFIX]);
-            foreach ($countryList as $value) {
-                if (trim($value) == $country) {
-                    return $this->get_option_value(self::MATCH_OPTIONS_PREFIX . $index . self::LOCALE_POSTFIX, '');
-                }
-            }
+        if (isset($matchOptions[$countryIndex])) {
+            return $this->get_option_value(self::MATCH_OPTIONS_PREFIX . $countryIndex . self::LOCALE_POSTFIX, '');
         }
         return '';
     }
@@ -195,7 +192,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
     {
         $matchOptions = $this->getMatchOptionsFromDb();
         foreach ($matchOptions as $index => $optionsData) {
-            if ($optionsData[self::URL_POSTFIX] == $url) {
+            if (isset($optionsData[self::URL_POSTFIX]) && $optionsData[self::URL_POSTFIX] == $url) {
                 return $index;
             }
         }

@@ -51,27 +51,41 @@ class GeoRedirect_Plugin
         $clientCountry = $cookieData['country'];
         $clientLocale = $cookieData['locale'];
 
-        if ($clientCountry && $currentCountryIndex == $clientCountry) {
+        $selectedCountry = '';
+        if (isset($_REQUEST['country'])) {
+            $selectedCountry = $_REQUEST['country'];
+        }
+
+        if ($clientCountry && $currentCountryIndex == $clientCountry && (!strlen($selectedCountry) || $currentCountryIndex == $selectedCountry)) {
             return;
         }
 
         $ip = $_SERVER['REMOTE_ADDR'];
 
-        $maxMind_Geolocation = new WC_Integration_MaxMind_Geolocation();
-        $locationData = $maxMind_Geolocation->get_geolocation([], $ip);
+        if (strlen($selectedCountry)) {
+            $countryIndex = $selectedCountry;
+        } else if (strlen($clientCountry)) {
+            $countryIndex = $clientCountry;
+        } else {
+            $maxMind_Geolocation = new WC_Integration_MaxMind_Geolocation();
+            $locationData = $maxMind_Geolocation->get_geolocation([], $ip);
 
-        if (!$locationData['country']) {
-            return;
+            if (!$locationData['country']) {
+                return;
+            }
+
+            $country = $locationData['country'];
+
+            $countryIndex = $this->options->getCountryIndex($country);
         }
 
-        $country = $locationData['country'];
-        $countryIndex = $this->options->getCountryIndex($country);
-
         $url = $this->options->getURL($countryIndex);
-        $locale = $clientLocale ?: $this->options->getLocale($country);
+        $locale = $clientLocale ?: $this->options->getLocale($countryIndex);
 
-        setcookie('theuntamed_locale', $locale, time() + (365 * 24 * 60 * 60), '/', '.theuntamed.com');
-        setcookie('theuntamed_country', $country, time() + (365 * 24 * 60 * 60), '/', '.theuntamed.com');
+        $cookieDomain = $this->options->get_option_value(GeoRedirect_Options::COOKIE_DOMAIN);
+
+        setcookie('theuntamed_locale', $locale, time() + (365 * 24 * 60 * 60), '/', $cookieDomain);
+        setcookie('theuntamed_country', $countryIndex, time() + (365 * 24 * 60 * 60), '/', $cookieDomain);
 
         if ($url && $url != get_site_url()) {
             $url .= $_SERVER['REQUEST_URI'];
@@ -92,7 +106,7 @@ class GeoRedirect_Plugin
 
     public function getCurrentCountryIndex()
     {
-       return  $this->options->getCountryIndexByURL(get_site_url());
+        return $this->options->getCountryIndexByURL(get_site_url());
     }
 
     public function getCookieData()

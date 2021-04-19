@@ -832,3 +832,63 @@ function wp_nav_menu_objects($menuItems, $args) {
     }
     return $menuItems;
 }
+
+
+add_action('storefront_header', 'storefront_header_custom', 40, 0);
+function storefront_header_custom() {
+    $geoRedirect = GeoRedirect_Plugin::getInstance();
+
+    $clientData = $geoRedirect->getCookieData();
+
+    $languageList = array_merge(array('en_US'), get_available_languages());
+    $languages = [];
+
+    $currentUrl = get_site_url() . $_SERVER['REQUEST_URI'];
+
+    foreach ($languageList as $item) {
+        $languages[] = [
+            'title' => $item,
+            'link' => add_query_arg(['lang' => $item], $currentUrl)
+        ];
+    }
+
+    $countries = $geoRedirect->options->getCountriesList();
+    $currentCountryIndex = $clientData['country'] ?: $geoRedirect->getCurrentCountryIndex();
+    $currentCountryTitle = isset($countries[$currentCountryIndex]) ? $countries[$currentCountryIndex] : 'Country';
+
+    $countriesOptions = [];
+
+    unset($countries[$currentCountryIndex]);
+
+    foreach ($countries as $index => $country) {
+        $countriesOptions[] = [
+            'title' => $countries[$index],
+            'link' => add_query_arg(['country' => $index], $currentUrl)
+        ];
+    }
+    ?>
+    <nav class="main-navigation" style="width: unset;clear: unset;margin: unset;float: right;margin-top: -1em;">
+        <div>
+            <ul class="menu nav-menu" aria-expanded="false">
+                <?php
+                show_menu_items_list($countriesOptions, $currentCountryTitle);
+                show_menu_items_list($languages, 'Language');
+                ?>
+            </ul>
+        </div>
+    </nav>
+    <?php
+}
+
+function show_menu_items_list($items, $title) {
+    echo '<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children">';
+    echo "<a href=\"#\">$title</a>";
+    echo '<ul class="sub-menu">';
+    foreach ($items as $item) {
+        $link = $item['link'];
+        $title = $item['title'];
+        echo "<li class=\"menu-item menu-item-type-custom menu-item-object-custom\"><a href=\"$link\">$title</a></li>";
+    }
+    echo '</ul>';
+    echo '</li>';
+}
