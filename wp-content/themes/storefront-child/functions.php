@@ -897,6 +897,11 @@ function show_menu_items_list($items, $title) {
 remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 add_filter( 'wc_add_to_cart_message_html', '__return_false' );
 add_action( 'woocommerce_before_checkout_form', 'remove_checkout_coupon_form', 9 );
-function remove_checkout_coupon_form(){
+function remove_checkout_coupon_form() {
     remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+}
+
+add_filter('woocommerce_min_password_strength', 'reduce_min_strength_password_requirement');
+function reduce_min_strength_password_requirement($strength) {
+    return 2;
 }
