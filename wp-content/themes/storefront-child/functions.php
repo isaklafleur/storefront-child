@@ -892,3 +892,11 @@ function show_menu_items_list($items, $title) {
     echo '</ul>';
     echo '</li>';
 }
+
+// Remove "Returning customer? Click here to login" From Checkout Page
+remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+add_filter( 'wc_add_to_cart_message_html', '__return_false' );
+add_action( 'woocommerce_before_checkout_form', 'remove_checkout_coupon_form', 9 );
+function remove_checkout_coupon_form(){
+    remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+}
