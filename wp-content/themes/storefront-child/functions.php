@@ -226,12 +226,12 @@ function wooc_extra_register_fields()
         <label for="reg_billing_phone"><?php _e('Mobile phone (number must start with + following your country code, ex +46)', 'woocommerce'); ?><span class="required">*</span></label>
         <input type="tel" class="input-text" name="billing_phone" id="reg_billing_phone" pattern="\+\d{5,}" value="<?php if (!empty($_POST['billing_phone'])) esc_attr_e($_POST['billing_phone']); ?>" />
     </p>
-<!--    <p class="form-row <?php /*echo $rowClass */?>">
-        <label for="reg_role"><?php /*_e('Customer, Affiliate or Brand Partner?', 'woocommerce'); */?><span class="required">*</span></label>
-        <select class="input-text" name="role" id="reg_role" <?php /*if (!empty($userRole)) echo 'disabled' */?>>
-            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'customer') esc_attr_e('selected'); */?> value="customer">Customer</option>
-            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'affiliate') esc_attr_e('selected'); */?> value="affiliate">Affiliate</option>
-            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'brandpartner') esc_attr_e('selected'); */?> value="brandpartner">Brand Partner</option>
+    <!--    <p class="form-row <?php /*echo $rowClass */ ?>">
+        <label for="reg_role"><?php /*_e('Customer, Affiliate or Brand Partner?', 'woocommerce'); */ ?><span class="required">*</span></label>
+        <select class="input-text" name="role" id="reg_role" <?php /*if (!empty($userRole)) echo 'disabled' */ ?>>
+            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'customer') esc_attr_e('selected'); */ ?> value="customer">Customer</option>
+            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'affiliate') esc_attr_e('selected'); */ ?> value="affiliate">Affiliate</option>
+            <option <?php /*if (!empty($_POST['role']) && $_POST['role'] == 'brandpartner') esc_attr_e('selected'); */ ?> value="brandpartner">Brand Partner</option>
         </select>
     </p>-->
     <?php
@@ -510,7 +510,7 @@ function action_woocommerce_edit_account_form_start()
             <label for="image"><?php esc_html_e('Profile Image', 'woocommerce'); ?>&nbsp;<span class="required">*</span></label>
             <input type="file" class="woocommerce-Input" name="image" accept="image/x-png,image/gif,image/jpeg">
         </p>
-<?php
+    <?php
     }
 }
 
@@ -519,18 +519,18 @@ function woocommerce_add_about_me_information()
 {
     $user = wp_get_current_user();
     if (in_array('brandpartner', $user->roles) || in_array('affiliate', $user->roles)) {
-        ?>
+    ?>
         <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
             <label for="about_me"><?php esc_html_e('About me', 'woocommerce'); ?></label>
             <textarea class="woocommerce-Input" name="about_me" style="resize: vertical" id="about_me"><?php
-                $aboutMe = get_user_meta($user->ID, 'description', true);
-                if (isset($_POST['about_me'])) {
-                    $aboutMe = $_POST['about_me'];
-                }
-                echo $aboutMe;
-                ?></textarea>
+                                                                                                        $aboutMe = get_user_meta($user->ID, 'description', true);
+                                                                                                        if (isset($_POST['about_me'])) {
+                                                                                                            $aboutMe = $_POST['about_me'];
+                                                                                                        }
+                                                                                                        echo $aboutMe;
+                                                                                                        ?></textarea>
         </p>
-        <?php
+    <?php
     }
 }
 
@@ -690,7 +690,8 @@ function profile_rewrite_rule()
 }
 
 add_filter('wc_sc_show_as_valid', 'check_valid_coupons', 10, 2);
-function check_valid_coupons($isValid, $coupon) {
+function check_valid_coupons($isValid, $coupon)
+{
     /** @var WC_Coupon $coupon */
     $coupon = $coupon['coupon_obj'];
     /** @var WC_DateTime $expiryDate */
@@ -706,15 +707,15 @@ function check_valid_coupons($isValid, $coupon) {
         $dateDiff = 1;
     }
 
-    if (!empty($coupon->get_email_restrictions()) && $coupon->get_amount() > 0 && $dateDiff > 0)
-    {
+    if (!empty($coupon->get_email_restrictions()) && $coupon->get_amount() > 0 && $dateDiff > 0) {
         return true;
     }
     return $isValid;
 }
 
 add_filter('custom_enrollment_process_template_page', 'setCustomEnrollmentPageTemplate', 10, 2);
-function setCustomEnrollmentPageTemplate($template, $stepNum) {
+function setCustomEnrollmentPageTemplate($template, $stepNum)
+{
     $path = get_theme_file_path('custom-enrollment-process/page-templates/enrollment') . "/page-$stepNum.php";
     if (file_exists($path)) {
         return $path;
@@ -723,7 +724,8 @@ function setCustomEnrollmentPageTemplate($template, $stepNum) {
 }
 
 add_filter('custom_enrollment_upgrade_template_page', 'setUpgradePage', 10, 2);
-function setUpgradePage($template, $stepNum) {
+function setUpgradePage($template, $stepNum)
+{
     $path = get_theme_file_path('custom-enrollment-process/page-templates/upgrade') . "/page-$stepNum.php";
     if (file_exists($path)) {
         return $path;
@@ -732,7 +734,8 @@ function setUpgradePage($template, $stepNum) {
 }
 
 add_filter('woocommerce_account_menu_items', 'set_profile_menus', 10, 1);
-function set_profile_menus($items) {
+function set_profile_menus($items)
+{
     $user = wp_get_current_user();
     if (!$user->ID) {
         return $items;
@@ -744,11 +747,12 @@ function set_profile_menus($items) {
     return $items;
 }
 
-function insert_after($var, $key, $value, $after){
+function insert_after($var, $key, $value, $after)
+{
     $new_object = array();
-    foreach((array) $var as $k => $v){
+    foreach ((array) $var as $k => $v) {
         $new_object[$k] = $v;
-        if ($after == $k){
+        if ($after == $k) {
             $new_object[$key] = $value;
         }
     }
@@ -756,13 +760,15 @@ function insert_after($var, $key, $value, $after){
 }
 
 add_action('init', 'add_account_profile_links', 10);
-function add_account_profile_links() {
+function add_account_profile_links()
+{
     add_rewrite_endpoint('referral-links', EP_PAGES);
     add_rewrite_endpoint('my-profile', EP_PAGES);
 }
 
 add_action('woocommerce_account_referral-links_endpoint', 'account_referral_links_page', 10);
-function account_referral_links_page() {
+function account_referral_links_page()
+{
     $siteUrl = get_site_url();
     $inviteCode = get_user_meta(get_current_user_id(), 'invite_code', true);
     $withBanner = "$siteUrl/?referral=$inviteCode&showbanner";
@@ -774,10 +780,12 @@ function account_referral_links_page() {
             width: 140px;
             display: inline-block;
         }
+
         .ref-link input {
             border-bottom: 1px solid black;
             width: 300px;
         }
+
         .ref-link button {
             margin-left: 10px;
         }
@@ -786,12 +794,11 @@ function account_referral_links_page() {
     <p class="ref-link"> <label for="ref-link-with-banner">Link with banner</label><input id="ref-link-with-banner" value="<?php echo $withBanner ?>"><button onclick="copyRefLink(true)">copy</button></p>
     <p class="ref-link"> <label for="ref-link-without-banner">Link without banner</label><input id="ref-link-without-banner" value="<?php echo $withoutBanner ?>"><button onclick="copyRefLink(false)">copy</button></p>
     <script>
-        function copyRefLink(withBanner)
-        {
+        function copyRefLink(withBanner) {
             let id;
             if (withBanner) {
                 id = 'ref-link-with-banner';
-            } else  {
+            } else {
                 id = 'ref-link-without-banner';
             }
             let input = document.querySelector('#' + id);
@@ -803,7 +810,8 @@ function account_referral_links_page() {
 }
 
 add_action('woocommerce_account_my-profile_endpoint', 'account_profile_page', 10);
-function account_profile_page() {
+function account_profile_page()
+{
     global $MlmSoft;
     /** @var WP_User $user */
     $user = wp_get_current_user();
@@ -813,17 +821,18 @@ function account_profile_page() {
         'PV' => $properties['PV'],
         'Status' => $properties['Status']
     ];
-    ?>
+?>
     <h2>Profile</h2>
     <?php foreach ($displayProperties as $alias => $property) {
         $value = $property['value'];
         $title = $property['title'];
         echo "<p>$title ($alias): $value</p>";
-     }
+    }
 }
 
 add_filter('wp_nav_menu_objects', 'wp_nav_menu_objects', 10, 2);
-function wp_nav_menu_objects($menuItems, $args) {
+function wp_nav_menu_objects($menuItems, $args)
+{
     /** @var WP_Post $menuItem */
     foreach ($menuItems as $menuItem) {
         if ($menuItem->post_name == 'logout') {
@@ -835,7 +844,8 @@ function wp_nav_menu_objects($menuItems, $args) {
 
 
 add_action('storefront_header', 'storefront_header_custom', 40, 0);
-function storefront_header_custom() {
+function storefront_header_custom()
+{
     $geoRedirect = GeoRedirect_Plugin::getInstance();
 
     $clientData = $geoRedirect->getCookieData();
@@ -877,10 +887,11 @@ function storefront_header_custom() {
             </ul>
         </div>
     </nav>
-    <?php
+<?php
 }
 
-function show_menu_items_list($items, $title) {
+function show_menu_items_list($items, $title)
+{
     echo '<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children">';
     echo "<a href=\"#\">$title</a>";
     echo '<ul class="sub-menu">';
@@ -894,14 +905,16 @@ function show_menu_items_list($items, $title) {
 }
 
 // Remove "Returning customer? Click here to login" From Checkout Page
-remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
-add_filter( 'wc_add_to_cart_message_html', '__return_false' );
-add_action( 'woocommerce_before_checkout_form', 'remove_checkout_coupon_form', 9 );
-function remove_checkout_coupon_form() {
-    remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10);
+add_filter('wc_add_to_cart_message_html', '__return_false');
+add_action('woocommerce_before_checkout_form', 'remove_checkout_coupon_form', 9);
+function remove_checkout_coupon_form()
+{
+    remove_action('woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10);
 }
 
 add_filter('woocommerce_min_password_strength', 'reduce_min_strength_password_requirement');
-function reduce_min_strength_password_requirement($strength) {
-    return 2;
+function reduce_min_strength_password_requirement($strength)
+{
+    return 1;
 }
