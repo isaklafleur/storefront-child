@@ -596,17 +596,17 @@ function action_woocommerce_edit_account_form_tag()
  * @source        Email from Ratnakar
  */
 
-add_action('wp_loaded', 'storeapps_handle_smart_coupons_hooks');
 function storeapps_handle_smart_coupons_hooks()
 {
-    /*if (!class_exists('WC_SC_Display_Coupons')) {
+    if (!class_exists('WC_SC_Display_Coupons')) {
         include_once trailingslashit(WP_PLUGIN_DIR . '/' . WC_SC_PLUGIN_DIRNAME) . 'includes/class-wc-sc-display-coupons.php';
     }
     $wc_sc_display_coupons = WC_SC_Display_Coupons::get_instance();
     if (has_action('woocommerce_after_cart_table', array($wc_sc_display_coupons, 'show_available_coupons_after_cart_table'))) {
         remove_action('woocommerce_after_cart_table', array($wc_sc_display_coupons, 'show_available_coupons_after_cart_table'));
-    }*/
+    }
 }
+add_action('wp_loaded', 'storeapps_handle_smart_coupons_hooks');
 
 
 /**
