@@ -163,7 +163,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
     {
         $matchOptions = $this->getMatchOptionsFromDb();
         foreach ($matchOptions as $index => $optionsData) {
-            if ($optionsData[self::URL_POSTFIX] == $url) {
+            if ($optionsData[self::URL_POSTFIX] == $url && isset($optionsData[self::COUNTRIES_POSTFIX])) {
                 $countries = explode(',', $optionsData[self::COUNTRIES_POSTFIX]);
                 foreach ($countries as &$country) {
                     $country = trim($country);
@@ -178,10 +178,12 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
     {
         $matchOptions = $this->getMatchOptionsFromDb();
         foreach ($matchOptions as $index => $optionsData) {
-            $countries = explode(',', $optionsData[self::COUNTRIES_POSTFIX]);
-            foreach ($countries as $country) {
-                if (trim($country) == $countryName) {
-                    return $index;
+            if (isset($optionsData[self::COUNTRIES_POSTFIX])) {
+                $countries = explode(',', $optionsData[self::COUNTRIES_POSTFIX]);
+                foreach ($countries as $country) {
+                    if (trim($country) == $countryName) {
+                        return $index;
+                    }
                 }
             }
         }
