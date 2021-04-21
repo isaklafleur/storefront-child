@@ -918,3 +918,54 @@ function reduce_min_strength_password_requirement($strength)
 {
     return 1;
 }
+
+add_filter('woocommerce_get_order_item_totals', 'add_pv_details', 10, 3);
+function add_pv_details($total_rows, $order, $tax_display) {
+    if (!check_pv_show()) {
+        return $total_rows;
+    }
+    $totalPV = calculate_order_total_pv($order);
+    $total_rows['total_pv'] = [
+        'label' => 'Total PV:',
+        'value' => "<span class=\"woocommerce-Price-amount amount\"><bdi>$totalPV</bdi></span>"
+    ];
+    return $total_rows;
+}
+
+add_action('woocommerce_admin_order_totals_after_total', 'add_pv_details_admin', 100, 1);
+function add_pv_details_admin($orderId) {
+    $order = wc_get_order($orderId);
+    $totalPV = calculate_order_total_pv($order);
+    ?>
+    <tr>
+        <td class="label label-highlight">
+            <?php esc_html_e( 'Total PV:' ); ?>
+        </td>
+        <td width="1%"></td>
+        <td class="woocommerce-Price-amount amount">
+            <?php echo $totalPV ?>
+        </td>
+    </tr>
+<?php
+}
+
+/**
+ * @param $order WC_Order
+ */
+function calculate_order_total_pv($order) {
+    $totalPV = 0;
+    /**
+     * @var  $cart_item_key
+     * @var  $product WC_Order_Item_Product
+     */
+    foreach ($order->get_items() as $order_Item) {
+        $quantity = $order_Item->get_quantity();
+        $product = $order_Item->get_product();
+        if ($quantity > 0) {
+            $pv = $product->get_meta('mlm_product_volume');
+            $totalPV += ($pv ? $pv * $quantity : 0);
+        }
+    }
+
+    return round($totalPV, 2);
+}
