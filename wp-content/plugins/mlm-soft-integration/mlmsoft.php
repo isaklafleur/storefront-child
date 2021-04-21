@@ -25,4 +25,8 @@ require_once( plugin_dir_path( __FILE__ ).'/classes/class.mlmsoftapiresponse.php
 require_once( plugin_dir_path( __FILE__ ).'/classes/class.mlmsoftoptions.php');
 require_once( plugin_dir_path( __FILE__ ).'/classes/class.mlmsoft.php');
 
-$MlmSoft = new MlmSoft;
+add_action('plugins_loaded', 'mlmsoft_plugins_loaded');
+
+function mlmsoft_plugins_loaded() {
+    $GLOBALS['MlmSoft'] = new MlmSoft();
+}

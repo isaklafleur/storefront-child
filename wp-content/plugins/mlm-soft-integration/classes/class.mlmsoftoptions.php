@@ -48,6 +48,10 @@ class MlmSoftOptions
         $this->options['rank_property_alias'] = array('id' => $this->options['plugin_prefix'] . 'rank_property_alias', 'label' => 'CP property alias for changing rank', 'type' => 'textfield', 'after_label' => '', 'value' => false, 'section' => 2);
         $this->options['rank_values'] = array('id' => $this->options['plugin_prefix'] . 'rank_values', 'label' => 'SKU/Rank associations', 'type' => 'textareafield', 'after_label' => '', 'value' => false, 'section' => 2);
 
+       $orderStatuses = wc_get_order_statuses();
+
+        $this->options['order_status_for_sending_volumes'] = array('id' => $this->options['plugin_prefix'] . 'order_status_for_sending_volumes', 'label' => 'Order status for sending volumes', 'type' => 'select', 'after_label' => '', 'value' => false, 'section' => 2, 'options' => $orderStatuses);
+
         foreach ($this->options as $key => $option) {
             if (is_array($this->options[$key])) {
                 $this->options[$key]['value'] = get_option($option['id']);
@@ -198,17 +202,20 @@ class MlmSoftOptions
 
     public function callback_for_select($arg)
     {
-        ?><select id="<?= $arg['id'] ?>" name="<?= $arg['id'] ?>">
-        <?php foreach ($arg['options'] as $value => $label) {
-            echo "<option value='$value'>$label</option>";
+        echo '<select id="'. $arg['id'] . '" name="'. $arg['id'] . '">';
+
+        foreach ($arg['options'] as $value => $label) {
+            if (get_option($arg['id']) == $value) {
+                echo "<option selected value='$value'>$label</option>";
+            } else {
+                echo "<option value='$value'>$label</option>";
+            }
         }
 
         if ($arg['after_label']) {
-            ?> <span class="after_label"> <?php echo $arg['after_label']; ?> </span> <?php
+            echo '<span class="after_label">' . $arg['after_label'] . '</span>';
         }
         echo '</select>';
     }
-
-
 }
 

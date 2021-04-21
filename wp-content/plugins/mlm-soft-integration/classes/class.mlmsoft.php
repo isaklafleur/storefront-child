@@ -61,7 +61,6 @@ class MlmSoft
         }
 
         if ($this->options['wc_integration']['value']) {
-            add_action('woocommerce_order_status_completed', array($this, 'woocommerce_order_status_completed'));
             add_action('woocommerce_after_checkout_form', array($this, 'woocommerce_after_checkout_form'));
             add_action('woocommerce_checkout_update_order_meta', array($this, 'woocommerce_checkout_update_order_meta'));
             add_filter('woocommerce_checkout_get_value', array($this, 'woocommerce_checkout_get_value'), 10, 2);
@@ -71,6 +70,7 @@ class MlmSoft
             add_action('woocommerce_created_customer', array($this, 'woocommerce_created_customer'), 10, 3);
             add_action('woocommerce_save_account_details', array($this, 'woocommerce_save_account_details'), 10, 1);
             add_action('woocommerce_checkout_order_created', array($this, 'woocommerce_checkout_order_created'), 10, 1);
+            add_action('woocommerce_order_status_changed', array($this, 'woocommerce_order_status_changed'), 10, 4);
         }
     }
 
@@ -689,71 +689,6 @@ class MlmSoft
         }
     }
 
-
-    public function woocommerce_order_status_completed($orderId)
-    {
-        $order = wc_get_order($orderId);
-        $userId = $order->get_user_id();
-        if ($userId) {
-            $account_id = get_user_meta($userId, 'account_id', true);
-        } else {
-            $account_id = get_post_meta($orderId, 'Referral account ID', true);
-        }
-        if (!$account_id) return;
-
-        if (empty($this->options['product_volume_attr']['value'])) {
-            $pointsAmount = $order->get_total();
-        } else {
-            $pointsAmount = 0;
-        }
-
-        if (!empty($this->options['product_volume_attr']['value']) || !empty($this->options['rank_property_alias']['value'])) {
-            $orderItems = $order->get_items();
-            $skuRankValues = $this->getSkuRankValues();
-            foreach ($orderItems as $item_id => $item) {
-                $product = $item->get_product();
-                if (!empty($this->options['product_volume_attr']['value'])) {
-                    $quantity = $item->get_quantity();
-                    $value = $product->get_attribute($this->options['product_volume_attr']['value']);
-                    if (!$value && $value !== '0') {
-                        $value = $product->get_meta($this->options['product_volume_attr']['value']);
-                    }
-                    $pointsAmount += $quantity * $value;
-                }
-                if (!empty($this->options['rank_property_alias']['value']) && !empty($skuRankValues)) {
-                    $sku = $product->get_sku();
-                    if (isset($skuRankValues[$sku])) {
-                        $this->apiClient->execPost(
-                            '/api2/online-office/account/volume-change',
-                            array(
-                                'accountId' => $account_id,
-                                'pointsAmount' => $skuRankValues[$sku],
-                                'orderId' => (string)$orderId,
-                                'volumePropertyAlias' => $this->options['rank_property_alias']['value']
-                            )
-                        );
-                    }
-                }
-            }
-        }
-
-        $salePropAlias = $this->options['sale_property_alias']['value'];
-
-        $params = array(
-            'accountId' => $account_id,
-            'pointsAmount' => $pointsAmount,
-            'orderId' => (string)$orderId,
-            'volumePropertyAlias' => $salePropAlias
-        );
-
-        $this->apiClient->execPost(
-            '/api2/online-office/account/volume-change',
-            $params
-        );
-
-        $this->update_user_status($userId);
-    }
-
     private function getSkuRankValues()
     {
         $skuRankValues = array();
@@ -995,5 +930,77 @@ class MlmSoft
             'billing_city' => $billingData['city']
         ];
         $this->updateUserProfile($order->data['customer_id'], $dataToUpdate);
+    }
+
+    public function woocommerce_order_status_changed($orderId, $statusFrom, $statusTo, $order)
+    {
+        if ('wc-' . $statusTo == $this->options['order_status_for_sending_volumes']['value']) {
+            $this->send_order_volumes($order);
+        }
+    }
+
+    /**
+     * @param $order WC_Order
+     */
+    public function send_order_volumes($order) {
+        $userId = $order->get_user_id();
+        if ($userId) {
+            $account_id = get_user_meta($userId, 'account_id', true);
+        } else {
+            $account_id = get_post_meta($order->get_id(), 'Referral account ID', true);
+        }
+        if (!$account_id) return;
+
+        if (empty($this->options['product_volume_attr']['value'])) {
+            $pointsAmount = $order->get_total();
+        } else {
+            $pointsAmount = 0;
+        }
+
+        if (!empty($this->options['product_volume_attr']['value']) || !empty($this->options['rank_property_alias']['value'])) {
+            $orderItems = $order->get_items();
+            $skuRankValues = $this->getSkuRankValues();
+            foreach ($orderItems as $item_id => $item) {
+                $product = $item->get_product();
+                if (!empty($this->options['product_volume_attr']['value'])) {
+                    $quantity = $item->get_quantity();
+                    $value = $product->get_attribute($this->options['product_volume_attr']['value']);
+                    if (!$value && $value !== '0') {
+                        $value = $product->get_meta($this->options['product_volume_attr']['value']);
+                    }
+                    $pointsAmount += $quantity * $value;
+                }
+                if (!empty($this->options['rank_property_alias']['value']) && !empty($skuRankValues)) {
+                    $sku = $product->get_sku();
+                    if (isset($skuRankValues[$sku])) {
+                        $this->apiClient->execPost(
+                            '/api2/online-office/account/volume-change',
+                            array(
+                                'accountId' => $account_id,
+                                'pointsAmount' => $skuRankValues[$sku],
+                                'orderId' => (string)$order->get_id(),
+                                'volumePropertyAlias' => $this->options['rank_property_alias']['value']
+                            )
+                        );
+                    }
+                }
+            }
+        }
+
+        $salePropAlias = $this->options['sale_property_alias']['value'];
+
+        $params = array(
+            'accountId' => $account_id,
+            'pointsAmount' => $pointsAmount,
+            'orderId' => (string)$order->get_id(),
+            'volumePropertyAlias' => $salePropAlias
+        );
+
+        $this->apiClient->execPost(
+            '/api2/online-office/account/volume-change',
+            $params
+        );
+
+        $this->update_user_status($userId);
     }
 }
