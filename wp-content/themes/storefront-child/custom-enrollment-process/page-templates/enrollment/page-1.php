@@ -9,9 +9,11 @@ $customEnrollmentProcess->cart->clearCart();
 
 if (isset($_REQUEST['enrollment-step-1'])) {
     $error = '';
-    if (!is_email($_REQUEST['email'])) {
+    $email = sanitize_email($_REQUEST['email']);
+    $username = sanitize_text_field($_REQUEST['username']);
+    if (!is_email($email)) {
         $error = 'Email is not valid';
-    } else if (empty($_REQUEST['username'])) {
+    } else if (empty($username)) {
         $error = 'Username is empty';
     }
     if ($error) {

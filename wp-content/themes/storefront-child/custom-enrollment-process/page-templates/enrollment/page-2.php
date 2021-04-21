@@ -11,7 +11,7 @@ $userTypes = [
 
 $username = $customEnrollmentProcess->getStepPayload(1)['username'];
 
-if (isset($_REQUEST['user-type'])) {
+if (isset($_REQUEST['user-type']) && in_array($_REQUEST['user-type'], $userTypes)) {
     $customEnrollmentProcess->setStepPayload(2, [
         'type' => $_REQUEST['user-type']
     ]);

@@ -22,7 +22,7 @@ if (in_array('brandpartner', $roles)) {
 }
 
 
-if (isset($_REQUEST['user-type'])) {
+if (isset($_REQUEST['user-type']) && in_array($_REQUEST['user-type'], $userTypes)) {
     $customEnrollmentProcess->setStepPayload(1, [
         'type' => $_REQUEST['user-type']
     ]);
