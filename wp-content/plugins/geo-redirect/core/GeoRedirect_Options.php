@@ -130,6 +130,7 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
         delete_option($base . self::COUNTRIES_POSTFIX);
         delete_option($base . self::LOCALE_POSTFIX);
         delete_option($base . self::DELETE_POSTFIX);
+        delete_option($base . self::COUNTRY_TITLE_POSTFIX);
     }
 
     public function getURL($countryIndex)
