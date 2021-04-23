@@ -850,17 +850,17 @@ function storefront_header_custom()
 
     $clientData = $geoRedirect->getCookieData();
 
-    $languageList = array_merge(array('en_US'), get_available_languages());
-    $languages = [];
+    //$languageList = array_merge(array('en_US'), get_available_languages());
+    //$languages = [];
 
     $currentUrl = get_site_url() . $_SERVER['REQUEST_URI'];
 
-    foreach ($languageList as $item) {
+    /*foreach ($languageList as $item) {
         $languages[] = [
             'title' => $item,
             'link' => add_query_arg(['lang' => $item], $currentUrl)
         ];
-    }
+    }*/
 
     $countries = $geoRedirect->options->getCountriesList();
     $currentCountryIndex = $clientData['country'] ?: $geoRedirect->getCurrentCountryIndex();
@@ -882,7 +882,7 @@ function storefront_header_custom()
             <ul class="menu nav-menu" aria-expanded="false">
                 <?php
                 show_menu_items_list($countriesOptions, $currentCountryTitle);
-                show_menu_items_list($languages, 'Language');
+                //show_menu_items_list($languages, 'Language');
                 ?>
             </ul>
         </div>
