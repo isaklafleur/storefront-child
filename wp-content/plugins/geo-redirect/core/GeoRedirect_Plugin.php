@@ -51,22 +51,28 @@ class GeoRedirect_Plugin
         $clientCountry = $cookieData['country'];
         $clientLocale = $cookieData['locale'];
 
+        $currentSiteLocale = wpml_get_current_language();
+
         $selectedCountry = '';
         if (isset($_REQUEST['country'])) {
             $selectedCountry = $_REQUEST['country'];
         }
-
-        if ($clientCountry && $currentCountryIndex == $clientCountry && (!strlen($selectedCountry) || $currentCountryIndex == $selectedCountry)) {
-            return;
+        $selectedLanguage = $currentSiteLocale;
+        if (isset($_REQUEST['lang'])) {
+            $selectedLanguage = $_REQUEST['lang'];
         }
 
-        $ip = $_SERVER['REMOTE_ADDR'];
+        if ($clientCountry && $currentCountryIndex == $clientCountry && (!strlen($selectedCountry) || $currentCountryIndex == $selectedCountry) &&
+            !empty($clientLocale) && $clientLocale == $currentSiteLocale && $selectedLanguage == $currentSiteLocale) {
+            return;
+        }
 
         if (strlen($selectedCountry)) {
             $countryIndex = $selectedCountry;
         } else if (strlen($clientCountry)) {
             $countryIndex = $clientCountry;
         } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
             $maxMind_Geolocation = new WC_Integration_MaxMind_Geolocation();
             $locationData = $maxMind_Geolocation->get_geolocation([], $ip);
 
@@ -79,17 +85,34 @@ class GeoRedirect_Plugin
             $countryIndex = $this->options->getCountryIndex($country);
         }
 
+        if ($selectedLanguage) {
+            $locale = $selectedLanguage;
+        } else {
+            $locale = $clientLocale ?: $this->options->getLocale($countryIndex);
+        }
+
         $url = $this->options->getURL($countryIndex);
-        $locale = $clientLocale ?: $this->options->getLocale($countryIndex);
+
+        $localeItems = wpml_get_active_languages();
+        if (!in_array($locale, array_keys($localeItems))) {
+            $locale = $currentSiteLocale;
+        }
 
         $cookieDomain = $this->options->get_option_value(GeoRedirect_Options::COOKIE_DOMAIN);
 
         setcookie('theuntamed_locale', $locale, time() + (365 * 24 * 60 * 60), '/', $cookieDomain);
         setcookie('theuntamed_country', $countryIndex, time() + (365 * 24 * 60 * 60), '/', $cookieDomain);
 
-        if ($url && $url != get_site_url()) {
+        $urlCorrect = $url && $url == get_site_url();
+        $localeCorrect = $locale == $currentSiteLocale;
+
+        if (!$localeCorrect || !$urlCorrect) {
             $url .= $_SERVER['REQUEST_URI'];
+            if (!$localeCorrect) {
+                $url = add_query_arg(['lang' => $locale], $url);
+            }
             wp_redirect($url);
+            exit();
         }
     }
 
@@ -114,8 +137,8 @@ class GeoRedirect_Plugin
         $clientCountry = isset($_COOKIE['theuntamed_country']) ? $_COOKIE['theuntamed_country'] : '';
         $clientLocale = isset($_COOKIE['theuntamed_locale']) ? $_COOKIE['theuntamed_locale'] : '';
         return [
-            'country' => $clientCountry,
-            'locale' => $clientLocale
+            'country' => trim($clientCountry),
+            'locale' => trim($clientLocale)
         ];
     }
 }

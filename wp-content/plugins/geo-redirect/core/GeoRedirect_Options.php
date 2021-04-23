@@ -40,10 +40,10 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
             'optionRows' => []
         ];
 
-        $localeItems = array_merge(array('en_US'), get_available_languages());;
+        $localeItems = wpml_get_active_languages();
         $localeOptions = [];
-        foreach ($localeItems as $item) {
-            $localeOptions[$item] = $item;
+        foreach ($localeItems as $key => $item) {
+            $localeOptions[$key] = $item['english_name'];
         }
 
         $matchOptions = $this->getMatchOptionsFromDb();
