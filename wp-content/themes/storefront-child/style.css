@@ -88,3 +88,143 @@ a:focus, .focus a {
   vertical-align: middle;
   /* position: fixed; */
 }
+
+.section-switch {
+    display: none;
+}
+
+.section-switch ~ label {
+    display: block;
+    margin-top: 10pt;
+    margin-bottom: 20px;
+    padding: 10px 5px;
+    border-bottom: solid #ffffff 1pt;
+    cursor: pointer;
+    transition: border-bottom-color .2s;
+}
+
+.section-switch:checked ~ label ~ table {
+    display: none;
+}
+
+.section-switch:checked ~ label {
+    border-bottom: solid #4c4c4c 1pt;
+}
+
+.arrow {
+    border: solid black;
+    border-width: 0 1px 1px 0;
+    display: inline-block;
+    padding: 5px;
+    float: right;
+    transform: rotate(-135deg);
+    margin-right: 10px;
+}
+
+.section-switch:checked ~ label .arrow {
+    transform: rotate(45deg);
+}
+
+.woocommerce-checkout-review-order-table-mobile {
+    display: none;
+}
+
+.woocommerce-checkout-review-order-table-mobile .shipping {
+    display: none;
+}
+
+@media only screen and (max-width: 768px) {
+    .woocommerce-checkout-review-order-table-mobile {
+        display: block;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    .section-switch ~ label {
+        display: none;
+    }
+
+    .arrow {
+        display: none;
+    }
+
+    .woocommerce-checkout-review-order-table {
+        display: block !important;
+    }
+}
+
+.form-row .input-text {
+    transition: padding 0.2s;
+    width: 100%;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background: none;
+    position: relative;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    outline: 0;
+    padding: 12px 6px;
+}
+
+.form-row .input-text:valid {
+    background: white;
+    padding: 20px 6px 4px 6px;
+}
+
+.form-row .input-text:focus {
+    background: white;
+    border: 1px solid #797979;
+    padding: 20px 6px 4px 6px;
+}
+
+.form-row .input-text::placeholder {
+    opacity: 0;
+    transition: opacity .2s;
+    color: #999;
+}
+
+.form-row .input-text ~ label {
+    transition:
+            background 0.2s,
+            color 0.2s,
+            top 0.2s,
+            bottom 0.2s,
+            font-size 0.2s;
+    position: absolute;
+    color: #999;
+    padding: 0 6px;
+    top: 12px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+.select2-selection {
+    margin-bottom: 0 !important;
+}
+
+.form-row .input-text:focus ~ label, .input-text:valid ~ label {
+    font-size: 90%;
+    padding: 1px 6px;
+    z-index: 2;
+    top: 0;
+    margin-bottom: 25px;
+}
+
+.form-row .input-text:focus ~ label {
+    color: #434343;
+}
+
+.form-row .input-text:focus::placeholder, .input-text:valid::placeholder {
+    opacity: 1;
+}
+
+.form-row .input-text:valid ~ label {
+    color: #606060;
+}
+
+.form-row {
+    position: relative;
+    overflow: hidden;
+}
