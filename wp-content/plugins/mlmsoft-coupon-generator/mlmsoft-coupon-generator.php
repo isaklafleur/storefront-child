@@ -34,10 +34,10 @@ function _handle_form_action()
             }
             $walletOperationResult = $mlmSoft->addWalletOperation($user->ID, $amountToDeduct, $walletTypeId, $operationTypeId, 'Sachet sample');
             if ($walletOperationResult) {
-                $mlmSoftCouponGenerator->generateCoupon($user->user_email, $amountToGive, 10);
+                $couponDescription = 'Store Credit can be used to purchase sachet sample products only';
+                $mlmSoftCouponGenerator->generateCoupon($user->user_email, $amountToGive, 10, $couponDescription);
             }
         }
     }
     wp_redirect('/wp-admin/admin.php?page=mlmsoft_coupon_generator_settings');
-    //wc_add_notice('awdawfaw');
 }

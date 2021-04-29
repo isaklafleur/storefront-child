@@ -87,14 +87,16 @@ class MLMSoftWalletCoupons_Plugin
         $user = get_user_by('id', $userId);
         $couponCode = get_user_meta($user->ID, 'wallet_coupon_code', true);
 
+        $couponDescription = 'eWallet coupon can be used for any purchase.';
+
         if (!$couponCode) {
-            $coupon = $mlmSoftCouponGenerator->generateCoupon($user->user_email, 0, 15, '', 'fixed_cart');
+            $coupon = $mlmSoftCouponGenerator->generateCoupon($user->user_email, 0, 15, $couponDescription,'', 'fixed_cart');
             add_user_meta($user->ID, 'wallet_coupon_code', $coupon->get_code());
         } else {
             $couponId = wc_get_coupon_id_by_code($couponCode);
             $coupon = new WC_Coupon($couponId);
             if (!$coupon->get_id()) {
-                $coupon = $mlmSoftCouponGenerator->generateCoupon($user->user_email, 0, 15, '', 'fixed_cart');
+                $coupon = $mlmSoftCouponGenerator->generateCoupon($user->user_email, 0, 15, $couponDescription,'', 'fixed_cart');
                 update_user_meta($user->ID, 'wallet_coupon_code', $coupon->get_code());
                 $coupon->save();
             }

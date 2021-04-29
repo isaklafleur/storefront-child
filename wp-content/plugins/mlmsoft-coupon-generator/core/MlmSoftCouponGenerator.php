@@ -43,7 +43,7 @@ class MlmSoftCouponGenerator
     {
         $coupons = [];
         foreach ($userEmails as $userEmail) {
-            $coupons[] = $this->generateCoupon($userEmail, $amount, $codeLength, $productCategory);
+            $coupons[] = $this->generateCoupon($userEmail, $amount, $codeLength, '', $productCategory);
         }
         return $coupons;
     }
@@ -52,15 +52,16 @@ class MlmSoftCouponGenerator
      * @param string $userEmail
      * @param int $amount
      * @param int $codeLength
+     * @param string $description
      * @param string $productCategory
      * @param string $discountType
      * @return string
      */
-    public function generateCoupon($userEmail, $amount, $codeLength, $productCategory = '22', $discountType = 'smart_coupon')
+    public function generateCoupon($userEmail, $amount, $codeLength, $description = '', $productCategory = '22', $discountType = 'smart_coupon')
     {
         $coupon = new WC_Coupon();
         $coupon->set_code($this->generateRandomCode($codeLength));
-        $coupon->set_description('Store Credit can be used to purchase sachet sample products only.');
+        $coupon->set_description($description);
         $coupon->set_discount_type($discountType);
         $coupon->set_amount($amount);
         $coupon->set_individual_use(true);
