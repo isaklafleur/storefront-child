@@ -1174,10 +1174,7 @@ function woocommerce_form_field($key, $args, $value = null) {
     if (!empty($field)) {
         $field_html = '';
 
-
-        if (!in_array($args['type'], ['select', 'country'])) {
-            $field_html .= $field;
-        }
+        $field_html .= $field;
 
         if ($args['description']) {
             $field_html .= '<span class="description" id="' . esc_attr($args['id']) . '-description" aria-hidden="true">' . wp_kses_post($args['description']) . '</span>';
@@ -1185,10 +1182,6 @@ function woocommerce_form_field($key, $args, $value = null) {
 
         if ($args['label'] && 'checkbox' !== $args['type']) {
             $field_html .= '<label for="' . esc_attr($label_id) . '" class="' . esc_attr(implode(' ', $args['label_class'])) . '">' . wp_kses_post($args['label']) . $required . '</label>';
-        }
-
-        if (in_array($args['type'], ['select', 'country'])) {
-            $field_html .= $field;
         }
 
         $container_class = esc_attr(implode(' ', $args['class']));
@@ -1216,12 +1209,31 @@ function woocommerce_form_field($key, $args, $value = null) {
     }
 }
 
-function ace_remove_checkout_nav_menu($val, $args) {
-    // Make sure 'primary' is set to the menu ID you'd like to hide
-    if (is_checkout() && in_array($args->theme_location, array('primary'))) {
-        return false;
+add_filter('body_class', 'add_custom_body_classes', 10, 1);
+function add_custom_body_classes($classes) {
+    if (is_checkout()) {
+        $classes[] = 'checkout-page';
     }
-    return $val;
+    return $classes;
 }
 
-add_filter('pre_wp_nav_menu', 'ace_remove_checkout_nav_menu', 10, 2);
+add_filter('woocommerce_form_field_args', 'add_autocomplete_nope', 10, 3);
+function add_autocomplete_nope($args, $key, $value) {
+    if (!is_checkout()) {
+        return $args;
+    }
+    if (in_array($key, ['billing_email', 'account_password'])) {
+        $args['autocomplete'] = 'nope';
+    }
+    return $args;
+}
+
+add_filter('woocommerce_update_order_review_fragments', 'add_checkout_order_summary_update', 10, 2);
+function add_checkout_order_summary_update($data)
+{
+    ob_start();
+    wc_get_template('checkout/form-checkout-order-summary.php');
+    $template = ob_get_clean();
+    $data['.woocommerce-checkout-review-order-table-mobile'] = $template;
+    return $data;
+}

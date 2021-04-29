@@ -22,7 +22,7 @@ $showPV = check_pv_show();
 
 ?>
 <table class="shop_table woocommerce-checkout-review-order-table">
-    <thead>
+    <thead class="form-checkout-order-summary">
         <tr>
             <th class="product-name"><?php esc_html_e('Product', 'woocommerce'); ?></th>
             <th class="product-total"><?php esc_html_e('Subtotal', 'woocommerce'); ?></th>
@@ -31,43 +31,31 @@ $showPV = check_pv_show();
             <?php } ?>
         </tr>
     </thead>
-    <tbody>
-        <?php
-        do_action('woocommerce_review_order_before_cart_contents');
+    <tbody class="form-checkout-order-summary">
+    <?php
+    do_action( 'woocommerce_review_order_before_cart_contents' );
 
-        foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-            $_product = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
+    foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+        $_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 
-            if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key)) {
-        ?>
-                <tr class="<?php echo esc_attr(apply_filters('woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key)); ?>">
-                    <td class="product-name">
-                        <?php echo wp_kses_post(apply_filters('woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key)) . '&nbsp;';
-                        ?>
-                        <?php echo apply_filters('woocommerce_checkout_cart_item_quantity', ' <strong class="product-quantity">' . sprintf('&times;&nbsp;%s', $cart_item['quantity']) . '</strong>', $cart_item, $cart_item_key); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-                        ?>
-                        <?php echo wc_get_formatted_cart_item_data($cart_item); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-                        ?>
-                    </td>
-                    <td class="product-total">
-                        <?php echo apply_filters('woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal($_product, $cart_item['quantity']), $cart_item, $cart_item_key); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-                        ?>
-                    </td>
-                    <?php if ($showPV) { ?>
-                        <td class="product-total">
-                            <?php
-                            $pv = (int)$_product->get_meta('mlm_product_volume');
-                            echo apply_filters('woocommerce_cart_item_subtotal_pv', $cart_item['quantity'] * $pv, $cart_item, $cart_item_key); // PHPCS: XSS ok.; 
-                            ?>
-                        </td>
-                    <?php } ?>
-                </tr>
-        <?php
-            }
+        if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
+            ?>
+            <tr class="<?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
+                <td class="product-name">
+                    <?php echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) ) . '&nbsp;'; ?>
+                    <?php echo apply_filters( 'woocommerce_checkout_cart_item_quantity', ' <strong class="product-quantity">' . sprintf( '&times;&nbsp;%s', $cart_item['quantity'] ) . '</strong>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php echo wc_get_formatted_cart_item_data( $cart_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </td>
+                <td class="product-total">
+                    <?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </td>
+            </tr>
+            <?php
         }
+    }
 
-        do_action('woocommerce_review_order_after_cart_contents');
-        ?>
+    do_action( 'woocommerce_review_order_after_cart_contents' );
+    ?>
     </tbody>
     <tfoot>
 

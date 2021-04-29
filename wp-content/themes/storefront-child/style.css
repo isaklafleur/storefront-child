@@ -98,35 +98,50 @@ a:focus, .focus a {
     margin-top: 10pt;
     margin-bottom: 20px;
     padding: 10px 5px;
-    border-bottom: solid #ffffff 1pt;
     cursor: pointer;
     transition: border-bottom-color .2s;
 }
 
-.section-switch:checked ~ label ~ table {
-    display: none;
+.section-switch ~ label ~ .checkout-order-summary {
+    height: 0;
+    transition: height 0.2s;
+    overflow: hidden;
+}
+
+.section-switch:checked ~ label ~ .checkout-order-summary {
+    height: unset;
 }
 
 .section-switch:checked ~ label {
-    border-bottom: solid #4c4c4c 1pt;
+
 }
 
 .arrow {
     border: solid black;
     border-width: 0 1px 1px 0;
-    display: inline-block;
     padding: 5px;
     float: right;
-    transform: rotate(-135deg);
+    transform: translateY(50%) rotate(45deg);
+    transition: all 0.2s;
     margin-right: 10px;
 }
 
 .section-switch:checked ~ label .arrow {
-    transform: rotate(45deg);
+    transform: translateY(100%) rotate(-135deg);
+}
+
+.section-switch ~ label .order-summary-text-show, .section-switch:checked ~ label .order-summary-text-hide {
+    display: inline;
+}
+
+.section-switch:checked ~ label .order-summary-text-show, .section-switch ~ label .order-summary-text-hide {
+    display: none;
 }
 
 .woocommerce-checkout-review-order-table-mobile {
     display: none;
+    border: 1px solid #aaa;
+    border-radius: 5px;
 }
 
 .woocommerce-checkout-review-order-table-mobile .shipping {
@@ -136,6 +151,22 @@ a:focus, .focus a {
 @media only screen and (max-width: 768px) {
     .woocommerce-checkout-review-order-table-mobile {
         display: block;
+    }
+
+    .checkout-page .menu-toggle {
+        display: none;
+    }
+
+    .checkout-page .storefront-breadcrumb {
+        display: none;
+    }
+
+    .checkout-page .entry-header {
+        display: none;
+    }
+
+    .form-checkout-order-summary {
+        display: none;
     }
 }
 
@@ -165,6 +196,19 @@ a:focus, .focus a {
     z-index: 1;
     outline: 0;
     padding: 12px 6px;
+}
+
+.select2-container .select2-selection--single {
+    height: unset;
+    padding: 12px 6px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100%;
+}
+
+.form-row select ~ label {
+    display: none;
 }
 
 .form-row .input-text:valid {
