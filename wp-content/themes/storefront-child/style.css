@@ -144,28 +144,39 @@ a:focus, .focus a {
     border-radius: 5px;
 }
 
-.woocommerce-checkout-review-order-table-mobile .shipping {
+.woocommerce-billing-fields-mobile,
+.order-review-mobile,
+.woocommerce-checkout-review-order-table-mobile .shipping,
+#order_review_heading-mobile
+{
     display: none;
 }
 
 @media only screen and (max-width: 768px) {
-    .woocommerce-checkout-review-order-table-mobile {
+    .woocommerce-checkout-review-order-table-mobile,
+    .woocommerce-billing-fields-mobile,
+    .checkout-page .woocommerce-billing-fields-mobile #billing_email_field,
+    .checkout-page .woocommerce-billing-fields-mobile .woocommerce-terms-and-conditions-wrapper,
+    .checkout-page .woocommerce-billing-fields-mobile .wc-newsletter-subscription-checkout-fields,
+    .order-review-mobile
+    {
         display: block;
     }
 
-    .checkout-page .menu-toggle {
-        display: none;
+    #order_review_heading-mobile {
+        display: inline;
     }
 
-    .checkout-page .storefront-breadcrumb {
-        display: none;
-    }
-
-    .checkout-page .entry-header {
-        display: none;
-    }
-
-    .form-checkout-order-summary {
+    #order_review_heading,
+    .checkout-page .menu-toggle,
+    .checkout-page .storefront-breadcrumb,
+    .checkout-page .entry-header,
+    .form-checkout-order-summary,
+    .wc-newsletter-subscription-checkout-fields,
+    .woocommerce-terms-and-conditions-wrapper,
+    .checkout-page #billing_email_field,
+    .order-review-desktop
+    {
         display: none;
     }
 }
@@ -200,7 +211,11 @@ a:focus, .focus a {
 
 .select2-container .select2-selection--single {
     height: unset;
-    padding: 12px 6px;
+    padding: 20px 6px 4px 6px;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+    padding-left: unset;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow {
@@ -208,7 +223,10 @@ a:focus, .focus a {
 }
 
 .form-row select ~ label {
-    display: none;
+    position: absolute;
+    top: 0;
+    padding: 1px 6px;
+    font-size: 90%;
 }
 
 .form-row .input-text:valid {

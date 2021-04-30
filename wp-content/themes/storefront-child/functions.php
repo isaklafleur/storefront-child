@@ -995,12 +995,14 @@ function woocommerce_form_field($key, $args, $value = null) {
     $args = wp_parse_args($args, $defaults);
     $args = apply_filters('woocommerce_form_field_args', $args, $key, $value);
 
-    $custom_attributes = array();
+    $custom_attributes = [
+        'required'
+    ];
 
     if ($args['required']) {
         $args['class'][] = 'validate-required';
         $required = '&nbsp;<abbr class="required" title="' . esc_attr__('required', 'woocommerce') . '">*</abbr>';
-        $custom_attributes[] = 'required';
+        //$custom_attributes[] = 'required';
     } else {
         $required = '&nbsp;<span class="optional">(' . esc_html__('optional', 'woocommerce') . ')</span>';
     }
@@ -1229,11 +1231,22 @@ function add_autocomplete_nope($args, $key, $value) {
 }
 
 add_filter('woocommerce_update_order_review_fragments', 'add_checkout_order_summary_update', 10, 2);
-function add_checkout_order_summary_update($data)
-{
+function add_checkout_order_summary_update($data) {
     ob_start();
     wc_get_template('checkout/form-checkout-order-summary.php');
     $template = ob_get_clean();
     $data['.woocommerce-checkout-review-order-table-mobile'] = $template;
     return $data;
+}
+
+add_filter('woocommerce_form_field_args', 'fix_address_field', 10, 3);
+function fix_address_field($args, $key, $value) {
+    if (!is_checkout()) {
+        return $args;
+    }
+    if (in_array($key, ['billing_address_2', 'shipping_address_2'])) {
+        $args['label_class'] = [];
+        $args['placeholder'] = '';
+    }
+    return $args;
 }
