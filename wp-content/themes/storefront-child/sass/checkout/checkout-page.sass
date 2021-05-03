@@ -1,0 +1,32 @@
+@import "./order-summary"
+
+.checkout-page
+  @import "./inputs"
+
+  .woocommerce-billing-fields-mobile,
+  .order-review-mobile,
+  .woocommerce-checkout-review-order-table-mobile,
+  .woocommerce-checkout-review-order-table-mobile .shipping,
+  #order_review_heading-mobile,
+  .only-mobile
+    display: none
+
+  @media only screen and (max-width: 768px)
+    @import "./mobile"
+    @import "./shipping-methods"
+
+  @media only screen and (min-width: 768px)
+    .section-switch ~ label
+      display: none
+
+    .arrow
+      display: none
+
+    .woocommerce-checkout-review-order-table
+      display: block !important
+
+  .pup-select select
+    padding: 10px
+    width: 100%
+    border: 1px solid #aaa
+    border-radius: 5px

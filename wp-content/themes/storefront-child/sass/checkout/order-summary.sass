@@ -1,0 +1,48 @@
+.section-switch
+  display: none
+
+  ~ label
+    display: block
+    margin-top: 10pt
+    margin-bottom: 20px
+    padding: 10px 5px
+    cursor: pointer
+    transition: border-bottom-color .2s
+
+    .order-summary-text-show
+      display: inline
+
+    .order-summary-text-hide
+      display: none
+
+    ~ .checkout-order-summary
+      height: 0
+      transition: height 0.2s
+      overflow: hidden
+
+    .arrow
+      border: solid black
+      border-width: 0 1px 1px 0
+      padding: 5px
+      float: right
+      transform: translateY(50%) rotate(45deg)
+      transition: all 0.2s
+      margin-right: 10px
+
+  &:checked
+    .order-summary-text-show
+      display: none
+
+    .order-summary-text-hide
+      display: inline
+
+    ~ label
+      ~ .checkout-order-summary
+        height: unset
+
+      .arrow
+        transform: translateY(100%) rotate(-135deg)
+
+.woocommerce-checkout-review-order-table-mobile
+  border: 1px solid #aaa
+  border-radius: 5px
