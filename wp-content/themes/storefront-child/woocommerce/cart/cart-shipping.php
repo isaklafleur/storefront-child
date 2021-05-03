@@ -42,15 +42,17 @@ $calculator_text = '';
             <ul id="shipping_method" class="woocommerce-shipping-methods">
                 <?php foreach ($available_methods as $method) : ?>
                     <li>
-                        <?php
-                        if (1 < (count($available_methods) + count($pickupPointMethods))) {
-                            printf('<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id), checked($method->id, $chosen_method, false)); // WPCS: XSS ok.
-                        } else {
-                            printf('<input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" />', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id)); // WPCS: XSS ok.
-                        }
-                        printf('<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr(sanitize_title($method->id)), wc_cart_totals_shipping_method_label($method)); // WPCS: XSS ok.
-                        do_action('woocommerce_after_shipping_rate', $method, $index);
-                        ?>
+                        <div>
+                            <?php
+                            if (1 < (count($available_methods) + count($pickupPointMethods))) {
+                                printf('<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id), checked($method->id, $chosen_method, false)); // WPCS: XSS ok.
+                            } else {
+                                printf('<input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" />', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id)); // WPCS: XSS ok.
+                            }
+                            printf('<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr(sanitize_title($method->id)), wc_cart_totals_shipping_method_label($method)); // WPCS: XSS ok.
+                            do_action('woocommerce_after_shipping_rate', $method, $index);
+                            ?>
+                        </div>
                     </li>
                 <?php endforeach; ?>
                 <?php
@@ -65,25 +67,28 @@ $calculator_text = '';
                 ?>
                 <?php if (count($pickupPointMethods)) { ?>
                     <li>
+                        <div>
+                            <?php
+                            $method = $pickupPointMethods[0];
+                            printf('<input type="radio" id="shipping_method_pup" data-index="%1$d" class="shipping_method" %2$s />', $index, $pupSelected ? 'checked' : '');
+                            printf('<label for="shipping_method_pup">PUP</label>');
+                            ?>
+                        </div>
                         <?php
-                        $method = $pickupPointMethods[0];
-                        printf('<input type="radio" id="shipping_method_pup" data-index="%1$d" class="shipping_method" %2$s />', $index, $pupSelected ? 'checked' : '');
-                        printf('<label for="shipping_method_pup">PUP</label>');
+
+                        printf('<div class="pup-select"><select id="shipping_method_pup_select" class="select" style="display: %1$s;">', $pupSelected ? 'block' : 'none');
+                        foreach ($pickupPointMethods as $method) {
+                            printf('<option name="shipping_method[%1$d]" data-index="%1$d" data-method="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s>%5$s</option>', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id), __checked_selected_helper($method->id, $chosen_method, false, 'selected'), wc_cart_totals_shipping_method_label($method)); // WPCS: XSS ok.
+                        }
+                        echo '</select></div>';
+                        foreach ($pickupPointMethods as $method) {
+                            echo "<li style='display: none;'>";
+                            printf('<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id), checked($method->id, $chosen_method, false)); // WPCS: XSS ok.
+                            echo "</li>";
+                        }
                         ?>
                     </li>
                 <?php } ?>
-                <?php
-                printf('<li><select id="shipping_method_pup_select" style="display: %1$s;">', $pupSelected ? 'block' : 'none');
-                foreach ($pickupPointMethods as $method) {
-                    printf('<option name="shipping_method[%1$d]" data-index="%1$d" data-method="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s>%5$s</option>', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id), __checked_selected_helper($method->id, $chosen_method, false, 'selected'), wc_cart_totals_shipping_method_label($method)); // WPCS: XSS ok.
-                }
-                echo '</select></li>';
-                foreach ($pickupPointMethods as $method) {
-                    echo "<li style='display: none;'>";
-                    printf('<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id), checked($method->id, $chosen_method, false)); // WPCS: XSS ok.
-                    echo "</li>";
-                }
-                ?>
             </ul>
             <script>
                 (() => {
