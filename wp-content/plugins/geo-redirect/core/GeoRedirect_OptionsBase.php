@@ -15,6 +15,7 @@ class GeoRedirect_OptionsBase
     private $tabs;
 
     const TYPE_TEXT_FIELD = 'text';
+    const TYPE_CHECKBOX_FIELD = 'checkbox';
     const TYPE_SELECT_FIELD = 'select';
     const TYPE_TABLE = 'table';
     const TYPE_CUSTOM_ACTION = 'custom_action';
@@ -230,6 +231,21 @@ class GeoRedirect_OptionsBase
         $option = $option[0];
         $val = esc_attr(get_option($option->id));
         echo "<input type='text' name='$option->id' id='$option->id' value='$val' size='40'/>";
+
+        if ($option->afterLabel) {
+            echo "<span class='after_label'>$option->afterLabel</span>";
+        }
+    }
+
+    /**
+     * @param $option GeoRedirectOptionItem[]
+     */
+    public function callback_for_checkbox($option)
+    {
+        $option = $option[0];
+        $val = esc_attr(get_option($option->id));
+        $checked = $val ? 'checked' : '';
+        echo "<input type='checkbox' name='$option->id' id='$option->id' $checked size='40'/>";
 
         if ($option->afterLabel) {
             echo "<span class='after_label'>$option->afterLabel</span>";

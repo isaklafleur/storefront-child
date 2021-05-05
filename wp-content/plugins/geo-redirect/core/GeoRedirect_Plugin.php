@@ -4,6 +4,7 @@
 class GeoRedirect_Plugin
 {
     const PLUGIN_BASE_NAME = 'geo-redirect/geo-redirect.php';
+    const API_ACTION = 'geo-redirect-api';
 
     /**
      * A reference to an instance of this class.
@@ -14,6 +15,11 @@ class GeoRedirect_Plugin
      * @var GeoRedirect_Options
      */
     public $options;
+
+    /**
+     * @var GeoRedirect_Api
+     */
+    public $api;
 
     /**
      * Returns an instance of this class.
@@ -30,6 +36,11 @@ class GeoRedirect_Plugin
     public function __construct()
     {
         $this->options = new GeoRedirect_Options();
+
+        $token = $this->options->get_option_value(GeoRedirect_Options::API_TOKEN);
+        $this->api = new GeoRedirect_Api(self::API_ACTION, $token, $this->options->get_option_value(GeoRedirect_Options::MASTER_API_URL));
+        $this->options->loadRules($this->api);
+
         $this->registerHooks();
     }
 
@@ -140,5 +151,13 @@ class GeoRedirect_Plugin
             'country' => trim($clientCountry),
             'locale' => trim($clientLocale)
         ];
+    }
+
+    public function getRules()
+    {
+        if (!$this->options->isMaster) {
+            return [];
+        }
+        return $this->options->getListRules();
     }
 }

@@ -11,5 +11,6 @@ require_once(plugin_dir_path(__FILE__) . '/core/GeoRedirect_OptionsBase.php');
 require_once(plugin_dir_path(__FILE__) . '/core/GeoRedirectOptionItem.php');
 require_once(plugin_dir_path(__FILE__) . '/core/GeoRedirect_Plugin.php');
 require_once(plugin_dir_path(__FILE__) . '/core/GeoRedirect_Options.php');
+require_once(plugin_dir_path(__FILE__) . '/core/GeoRedirect_Api.php');
 
 add_action('plugins_loaded', array('GeoRedirect_Plugin', 'getInstance'));
