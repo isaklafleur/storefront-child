@@ -269,9 +269,6 @@ class GeoRedirect_Options extends GeoRedirect_OptionsBase
             $this->matchOptions = $this->getMatchOptionsFromDb();
         } else {
             $this->matchOptions = $api->request('get_rules');
-            if (isset($_GET['debug'])) {
-                print_r($this->matchOptions);
-            }
         }
     }
 
