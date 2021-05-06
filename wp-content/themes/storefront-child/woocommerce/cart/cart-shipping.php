@@ -56,11 +56,12 @@ $calculator_text = '';
                     </li>
                 <?php endforeach; ?>
                 <?php
-                $pupSelected = false;
+                $selectedPickupMethod = null;
+
                 /** @var WC_Shipping_Rate $method */
                 foreach ($pickupPointMethods as $method) {
                     if (checked($method->id, $chosen_method, false)) {
-                        $pupSelected = true;
+                        $selectedPickupMethod = $method;
                         break;
                     }
                 }
@@ -70,13 +71,13 @@ $calculator_text = '';
                         <div>
                             <?php
                             $method = $pickupPointMethods[0];
-                            printf('<input type="radio" id="shipping_method_pup" data-index="%1$d" class="shipping_method" %2$s />', $index, $pupSelected ? 'checked' : '');
-                            printf('<label for="shipping_method_pup">PUP</label>');
+                            printf('<input type="radio" id="shipping_method_pup" data-index="%1$d" class="shipping_method" %2$s />', $index, $selectedPickupMethod ? 'checked' : '');
+                            printf('<label for="shipping_method_pup">PUP%1$s</label>', $selectedPickupMethod ? ': ' . wc_cart_totals_shipping_method_price($selectedPickupMethod) : '');
                             ?>
                         </div>
                         <?php
 
-                        printf('<div class="pup-select"><select id="shipping_method_pup_select" class="select" style="display: %1$s;">', $pupSelected ? 'block' : 'none');
+                        printf('<div class="pup-select"><select id="shipping_method_pup_select" class="select" style="display: %1$s;">', $selectedPickupMethod ? 'block' : 'none');
                         foreach ($pickupPointMethods as $method) {
                             printf('<option name="shipping_method[%1$d]" data-index="%1$d" data-method="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s>%5$s</option>', $index, esc_attr(sanitize_title($method->id)), esc_attr($method->id), __checked_selected_helper($method->id, $chosen_method, false, 'selected'), wc_cart_totals_shipping_method_label($method)); // WPCS: XSS ok.
                         }

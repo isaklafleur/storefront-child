@@ -1250,3 +1250,43 @@ function fix_address_field($args, $key, $value) {
     }
     return $args;
 }
+
+add_action('woocommerce_review_order_before_submit', 'add_order_total_to_mobile');
+function add_order_total_to_mobile() {
+    $showPV = check_pv_show();
+    ?>
+    <table class="shop_table only-mobile">
+        <tfoot>
+        <tr class="order-total">
+            <th><?php esc_html_e('Order total', 'woocommerce'); ?></th>
+            <td><?php wc_cart_totals_order_total_html(); ?></td>
+            <?php if ($showPV) { ?>
+                <td><?php wc_card_totals_order_total_pv_html(); ?></td>
+            <?php } ?>
+        </tr>
+        </tfoot>
+    </table>
+    <?php
+}
+
+function wc_cart_totals_shipping_method_price($method) {
+    $label = '';
+    $has_cost = 0 < $method->cost;
+    $hide_cost = !$has_cost && in_array($method->get_method_id(), array('free_shipping', 'local_pickup'), true);
+
+    if ($has_cost && !$hide_cost) {
+        if (WC()->cart->display_prices_including_tax()) {
+            $label .= wc_price($method->cost + $method->get_shipping_tax());
+            if ($method->get_shipping_tax() > 0 && !wc_prices_include_tax()) {
+                $label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
+            }
+        } else {
+            $label .= wc_price($method->cost);
+            if ($method->get_shipping_tax() > 0 && wc_prices_include_tax()) {
+                $label .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
+            }
+        }
+    }
+
+    return $label;
+}
